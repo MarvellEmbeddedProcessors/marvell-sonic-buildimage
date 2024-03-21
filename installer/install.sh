@@ -44,6 +44,9 @@ read_conf_file() {
 }
 
 set -e
+{ echo 0 > /proc/sys/kernel/hung_task_timeout_secs; } 2>/dev/null || true
+sync
+echo 3 > /proc/sys/vm/drop_caches
 
 if [ -d "/etc/sonic" ]; then
     echo "Installing SONiC in SONiC"
