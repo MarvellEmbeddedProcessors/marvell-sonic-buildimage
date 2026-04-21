@@ -89,8 +89,8 @@
 {% if DEVICE_METADATA is defined and DEVICE_METADATA['localhost'] is defined and DEVICE_METADATA['localhost']['frr_mgmt_framework_config'] is defined and DEVICE_METADATA['localhost']['frr_mgmt_framework_config'] == "true" %}
 	    ,
 	    "queue2_group2": {
-		    "cir":"400",
-		    "cbs":"400",
+		    "cir":"1000",
+		    "cbs":"1000",
 		    "meter_type":"packets",
 		    "mode":"sr_tcm",
 		    "red_action":"drop",
