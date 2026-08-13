@@ -2434,13 +2434,13 @@ class BGPConfigDaemon:
         comb_attr_list = ['vip']
         if not data:
             #VRRP instance is deleted
-            command = "vtysh -c 'configure terminal' -c '{}' -c 'no {}'".format(intf_cmd, cmd)
+            command = ['vtysh', '-c', 'configure terminal', '-c', intf_cmd, '-c', 'no {}'.format(cmd)]
             self.__run_command(table, command)
             #del cache data
             del(self.table_data_cache[table_key])
         else:
             #create/update case
-            command = "vtysh -c 'configure terminal' -c '{}'".format(intf_cmd)
+            command = ['vtysh', '-c', 'configure terminal', '-c', intf_cmd]
             self.__add_op_to_data(table_key, data, comb_attr_list)
             cached_data = self.table_data_cache.setdefault(table_key, {})
             for param in data:
@@ -2448,7 +2448,7 @@ class BGPConfigDaemon:
                     if param in cached_data and data[param].data == cached_data[param]:
                         continue
                     elif 'vip' not in data:
-                        command = command + " -c '{}'".format(cmd)
+                        command = command + ['-c', '{}'.format(cmd)]
                 elif param == 'vip':
                     if 'vip' in cached_data:
                         cache_address = cached_data[param]
@@ -2464,7 +2464,7 @@ class BGPConfigDaemon:
                                 except ValueError as err:
                                     syslog.syslog(syslog.LOG_ERR, '[bgp vrrpd] IP address is not valid:{}'.format(err))
                                 if ip_address.version == 4:
-                                    command = command + " -c '{} ip {}'".format(cmd, d_addr[0])
+                                    command = command + ['-c', '{} ip {}'.format(cmd, d_addr[0])]
                         # del vip
                         for c_address in cache_address:
                             if c_address in data_address:
@@ -2476,7 +2476,7 @@ class BGPConfigDaemon:
                                 except ValueError as err:
                                     syslog.syslog(syslog.LOG_ERR, '[bgp vrrpd] IP address is not valid:{}'.format(err))
                                 if ip_address.version == 4:
-                                    command = command + " -c 'no {} ip {}'".format(cmd, c_addr[0])
+                                    command = command + ['-c', 'no {} ip {}'.format(cmd, c_addr[0])]
                     else:
                         # first time to config
                         data_address = data[param].data
@@ -2487,38 +2487,38 @@ class BGPConfigDaemon:
                             except ValueError as err:
                                 syslog.syslog(syslog.LOG_ERR, '[bgp vrrpd] IP address is not valid:{}'.format(err))
                             if ip_address.version == 4:
-                                command = command + " -c '{} ip {}'".format(cmd, d_addr[0])
+                                command = command + ['-c', '{} ip {}'.format(cmd, d_addr[0])]
                 elif param == 'priority':
                     if param in cached_data and data[param].data == cached_data[param]:
                         continue
                     else:
-                        command = command + " -c '{} priority {}'".format(cmd, data[param].data)
+                        command = command + ['-c', '{} priority {}'.format(cmd, data[param].data)]
                 elif param == 'adv_interval':
                     if param in cached_data and data[param].data == cached_data[param]:
                         continue
                     else:
-                        command = command + " -c '{} advertisement-interval {}'".format(cmd, int(data[param].data) * 1000)
+                        command = command + ['-c', '{} advertisement-interval {}'.format(cmd, int(data[param].data) * 1000)]
                 elif param == 'version':
                     if param in cached_data and data[param].data == cached_data[param]:
                         continue
                     else:
-                        command = command + " -c '{} version {}'".format(cmd, data[param].data)
+                        command = command + ['-c', '{} version {}'.format(cmd, data[param].data)]
                 elif param == 'admin_status':
                     if param in cached_data and data[param].data == cached_data[param]:
                         continue
                     else:
                         if data[param].data == 'down':
-                            command = command + " -c '{} shutdown'".format(cmd)
+                            command = command + ['-c', '{} shutdown'.format(cmd)]
                         elif data[param].data == 'up' or data[param].data == '':
-                            command = command + " -c 'no {} shutdown'".format(cmd)
+                            command = command + ['-c', 'no {} shutdown'.format(cmd)]
                 elif param == 'preempt':
                     if param in cached_data and data[param].data == cached_data[param]:
                         continue
                     else:
                         if data[param].data == 'enabled':
-                            command = command + " -c '{} preempt'".format(cmd)
+                            command = command + ['-c', '{} preempt'.format(cmd)]
                         elif data[param].data == 'disabled':
-                            command = command + " -c 'no {} preempt'".format(cmd)
+                            command = command + ['-c', 'no {} preempt'.format(cmd)]
                 data[param].status = CachedDataWithOp.STAT_SUCC
             self.__update_cache_data(table_key, data)
             self.__run_command(table, command)
@@ -2533,13 +2533,13 @@ class BGPConfigDaemon:
         comb_attr_list = ['vip']
         if not data:
             #VRRP instance is deleted
-            command = "vtysh -c 'configure terminal' -c '{}' -c 'no {}'".format(intf_cmd, cmd)
+            command = ['vtysh', '-c', 'configure terminal', '-c', intf_cmd, '-c', 'no {}'.format(cmd)]
             self.__run_command(table, command)
             #del cache data
             del(self.table_data_cache[table_key])
         else:
             #create/update case
-            command = "vtysh -c 'configure terminal' -c '{}'".format(intf_cmd)
+            command = ['vtysh', '-c', 'configure terminal', '-c', intf_cmd]
             self.__add_op_to_data(table_key, data, comb_attr_list)
             cached_data = self.table_data_cache.setdefault(table_key, {})
             for param in data:
@@ -2547,7 +2547,7 @@ class BGPConfigDaemon:
                     if param in cached_data and data[param].data == cached_data[param]:
                         continue
                     elif 'vip' not in data:
-                        command = command + " -c '{}'".format(cmd)
+                        command = command + ['-c', '{}'.format(cmd)]
                 elif param == 'vip':
                     if 'vip' in cached_data:
                         cache_address = cached_data[param]
@@ -2562,7 +2562,7 @@ class BGPConfigDaemon:
                                 except ValueError as err:
                                     syslog.syslog(syslog.LOG_ERR, '[bgp vrrpd] IPv6 address is not valid:{}'.format(err))
                                 if ip_address.version == 6:
-                                    command = command + " -c '{} ipv6 {}'".format(cmd, d_addr[0])
+                                    command = command + ['-c', '{} ipv6 {}'.format(cmd, d_addr[0])]
 
                         for c_address in cache_address:
                             if c_address in data_address:
@@ -2574,7 +2574,7 @@ class BGPConfigDaemon:
                                 except ValueError as err:
                                     syslog.syslog(syslog.LOG_ERR, '[bgp vrrpd] IPv6 address is not valid:{}'.format(err))
                                 if ip_address.version == 6:
-                                    command = command + " -c 'no {} ipv6 {}'".format(cmd, c_addr[0])
+                                    command = command + ['-c', 'no {} ipv6 {}'.format(cmd, c_addr[0])]
                     else:
                         # first time to config 
                         data_address = data[param].data
@@ -2585,38 +2585,38 @@ class BGPConfigDaemon:
                             except ValueError as err:
                                 syslog.syslog(syslog.LOG_ERR, '[bgp vrrpd] IPv6 address is not valid:{}'.format(err))
                             if ip_address.version == 6:
-                                command = command + " -c '{} ipv6 {}'".format(cmd, d_addr[0])
+                                command = command + ['-c', '{} ipv6 {}'.format(cmd, d_addr[0])]
                 elif param == 'priority':
                     if param in cached_data and data[param].data == cached_data[param]:
                         continue
                     else:
-                        command = command + " -c '{} priority {}'".format(cmd, data[param].data)
+                        command = command + ['-c', '{} priority {}'.format(cmd, data[param].data)]
                 elif param == 'adv_interval':
                     if param in cached_data and data[param].data == cached_data[param]:
                         continue
                     else:
-                        command = command + " -c '{} advertisement-interval {}'".format(cmd, int(data[param].data) * 1000)
+                        command = command + ['-c', '{} advertisement-interval {}'.format(cmd, int(data[param].data) * 1000)]
                 elif param == 'version':
                     if param in cached_data and data[param].data == cached_data[param]:
                         continue
                     else:
-                        command = command + " -c '{} version {}'".format(cmd, data[param].data)
+                        command = command + ['-c', '{} version {}'.format(cmd, data[param].data)]
                 elif param == 'admin_status':
                     if param in cached_data and data[param].data == cached_data[param]:
                         continue
                     else:
                         if data[param].data == 'down':
-                            command = command + " -c '{} shutdown'".format(cmd)
+                            command = command + ['-c', '{} shutdown'.format(cmd)]
                         elif data[param].data == 'up' or data[param].data == '':
-                            command = command + " -c 'no {} shutdown'".format(cmd)
+                            command = command + ['-c', 'no {} shutdown'.format(cmd)]
                 elif param == 'preempt':
                     if param in cached_data and data[param].data == cached_data[param]:
                         continue
                     else:
                         if data[param].data == 'enabled':
-                            command = command + " -c '{} preempt'".format(cmd)
+                            command = command + ['-c', '{} preempt'.format(cmd)]
                         elif data[param].data == 'disabled':
-                            command = command + " -c 'no {} preempt'".format(cmd)
+                            command = command + ['-c', 'no {} preempt'.format(cmd)]
                 data[param].status = CachedDataWithOp.STAT_SUCC
             self.__update_cache_data(table_key, data)
             self.__run_command(table, command)
@@ -2630,12 +2630,12 @@ class BGPConfigDaemon:
 
         if not data:
             #VRRP track instance is deleted
-            command = "vtysh -c 'configure terminal' -c '{}' -c 'no {}'".format(intf_cmd, cmd)
+            command = ['vtysh', '-c', 'configure terminal', '-c', intf_cmd, '-c', 'no {}'.format(cmd)]
             self.__run_command(table, command)
         else:
             #create/update case
             if 'priority_increment' in data:
-                command = "vtysh -c 'configure terminal' -c '{}' -c '{} priority-dec {}'".format(intf_cmd, cmd, data['priority_increment'])
+                command = ['vtysh', '-c', 'configure terminal', '-c', intf_cmd, '-c', '{} priority-dec {}'.format(cmd, data['priority_increment'])]
                 self.__run_command(table, command)
 
     def vrrp6_track_handler(self, table, key, data):
@@ -2647,12 +2647,12 @@ class BGPConfigDaemon:
 
         if not data:
             #VRRP track instance is deleted
-            command = "vtysh -c 'configure terminal' -c '{}' -c 'no {}'".format(intf_cmd, cmd)
+            command = ['vtysh', '-c', 'configure terminal', '-c', intf_cmd, '-c', 'no {}'.format(cmd)]
             self.__run_command(table, command)
         else:
             #create/update case
             if 'priority_increment' in data:
-                command = "vtysh -c 'configure terminal' -c '{}' -c '{} priority-dec {}'".format(intf_cmd, cmd, data['priority_increment'])
+                command = ['vtysh', '-c', 'configure terminal', '-c', intf_cmd, '-c', '{} priority-dec {}'.format(cmd, data['priority_increment'])]
                 self.__run_command(table, command)
 
     def vrf_handler(self, table, key, data):
