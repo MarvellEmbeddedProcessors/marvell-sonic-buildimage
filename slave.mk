@@ -137,6 +137,8 @@ configure :
 	$(Q)mkdir -p $(TRIXIE_PHONY_PATH)
 	$(Q)mkdir -p $(PYTHON_DEBS_PATH)
 	$(Q)mkdir -p $(PYTHON_WHEELS_PATH)
+	$(Q)mkdir -p $(TARGET_PATH)/python-debs/bookworm
+	$(Q)mkdir -p $(TARGET_PATH)/python-wheels/bookworm
 	$(Q)mkdir -p $(DPKG_ADMINDIR_PATH)
 	$(Q)mkdir -p $(TARGET_PATH)/vcache
 	$(Q)echo $(PLATFORM) > .platform
