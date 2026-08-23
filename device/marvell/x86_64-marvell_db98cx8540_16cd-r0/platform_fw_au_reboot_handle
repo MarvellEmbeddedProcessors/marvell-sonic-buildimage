@@ -1,0 +1,8 @@
+#!/bin/bash
+
+if [[ $(tty) == /dev/pts/* ]]; then
+  echo "Management interface goes down"
+  echo "Apply $1"
+fi
+ip link set dev eth0 down 2>/dev/null || true
+rmmod mvcpss 2>/dev/null || true

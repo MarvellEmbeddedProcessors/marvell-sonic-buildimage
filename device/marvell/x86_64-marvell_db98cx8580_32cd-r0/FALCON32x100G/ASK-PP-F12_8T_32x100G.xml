@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<data xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" version="2025-02-25-1.11" profile="Askpp" dsig="md5" sid="69bab25d-d8f6-4bfe-baf5-bdcb26c08ff6">
+<data xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" version="2026-03-19-1.15" profile="Askpp" dsig="md5" sid="07a119ea-ffc8-46e0-92aa-a1b246d7feed">
   <askppplt:ASK-PP xmlns:askppplt="urn:marvell:askpp:yang">
     <askppplt:typedefs>
       <askppplt:typedef>
@@ -1167,7 +1167,7 @@
         <askppplt:initPort askppplt:type="boolean-type">true</askppplt:initPort>
         <askppplt:initTrunk askppplt:type="boolean-type">true</askppplt:initTrunk>
         <askppplt:Trunk-params>
-          <askppplt:maxNumberOfTrunks askppplt:type="uint32">1023</askppplt:maxNumberOfTrunks>
+          <askppplt:maxNumberOfTrunks askppplt:type="uint32">31</askppplt:maxNumberOfTrunks>
           <askppplt:trunkMembersMode askppplt:type="trunk-member-mode-type">FLEX</askppplt:trunkMembersMode>
         </askppplt:Trunk-params>
         <askppplt:initPcl askppplt:type="boolean-type">true</askppplt:initPcl>
