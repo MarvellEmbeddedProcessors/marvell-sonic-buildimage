@@ -52,17 +52,15 @@ docker_try_rmi() {
 
 sonic_get_version() {
     local describe=$(git describe --tags 2>/dev/null)
-    local latest_tag=$(git describe --tags --abbrev=0 2>/dev/null)
     local branch_name=$(git rev-parse --abbrev-ref HEAD)
     if [ -n "$(git status --untracked-files=no -s --ignore-submodules)" ]; then
         local dirty="-dirty-$BUILD_TIMESTAMP"
     fi
     BUILD_NUMBER=${BUILD_NUMBER:-0}
-    ## Check if we are on tagged commit
+    ## Use `git describe` output as the release name: nearest tag, plus the
+    ## commits-since count and g<sha> when HEAD is ahead of that tag.
+    ## Fall back to branch name and build number when no tag is reachable.
+    local release_name="${describe:-${branch_name}.${BUILD_NUMBER}}"
     ## Note: escape the version string by sed: / -> _
-    if [ -n "$latest_tag" ] && [ "$describe" == "$latest_tag" ]; then
-        echo "${latest_tag}${dirty}" | sed 's/\//_/g'
-    else
-        echo "${branch_name}.${BUILD_NUMBER}${dirty:--$(git rev-parse --short HEAD)}" | sed 's/\//_/g'
-    fi
+    echo "${release_name}${dirty}" | sed 's/\//_/g'
 }
