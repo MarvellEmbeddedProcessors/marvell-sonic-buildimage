@@ -12,8 +12,8 @@
 	branch = 202511
 [submodule "sonic-swss"]
 	path = src/sonic-swss
-	url = https://github.com/sonic-net/sonic-swss
-	branch = 202511
+	url = https://github.com/MarvellEmbeddedProcessors/marvell-sonic-swss.git
+	branch = rls-202511.01
 [submodule "src/p4c-bm/p4c-bm"]
 	path = platform/p4/p4c-bm/p4c-bm
 	url = https://github.com/krambn/p4c-bm
@@ -37,7 +37,8 @@
 	url = https://github.com/p4lang/ptf.git
 [submodule "src/sonic-utilities"]
 	path = src/sonic-utilities
-	url = https://github.com/sonic-net/sonic-utilities
+	url = https://github.com/MarvellEmbeddedProcessors/marvell-sonic-utilities.git
+        branch = rls-202511.01
 [submodule "platform/broadcom/sonic-platform-modules-arista"]
 	path = platform/broadcom/sonic-platform-modules-arista
 	url = https://github.com/aristanetworks/sonic
@@ -141,7 +142,8 @@
 	url = https://github.com/sonic-net/sonic-dash-ha
 [submodule "src/sonic-stp"]
 	path = src/sonic-stp
-	url = https://github.com/sonic-net/sonic-stp
+	url = https://github.com/MarvellEmbeddedProcessors/marvell-sonic-stp.git
+	branch = rls-202511.01
 [submodule "platform/marvell-teralynx/sonic-platform-marvell-teralynx"]
 	path = platform/marvell-teralynx/sonic-platform-marvell-teralynx
 	url = https://github.com/Marvell-switching/sonic-platform-marvell.git
@@ -151,9 +153,11 @@
 [submodule "platform/marvell-prestera/mrvl-prestera"]
 	path = platform/marvell-prestera/mrvl-prestera
 	url = https://github.com/Marvell-switching/mrvl-prestera.git
+	branch=202511
 [submodule "platform/marvell-prestera/sonic-platform-marvell"]
 	path = platform/marvell-prestera/sonic-platform-marvell
 	url = https://github.com/Marvell-switching/sonic-platform-arm64.git
+	branch=202511
 [submodule "src/sonic-sysmgr/gnoi"]
 	path = src/sonic-sysmgr/gnoi
 	url = https://github.com/openconfig/gnoi
