@@ -1,7 +1,13 @@
 MPATH       := $($(AC5X_RD98DX35xx_PLATFORM)_SRC_PATH)
 DEP_FILES   := $(SONIC_COMMON_FILES_LIST) $(PLATFORM_PATH)/platform-marvell.dep $(PLATFORM_PATH)/platform-marvell.mk
 DEP_FILES   += $(SONIC_COMMON_BASE_FILES_LIST)
-SMDEP_FILES := $(addprefix $(MPATH)/,$(shell cd $(MPATH) && git ls-files))
+# Exclude broken symlinks (e.g. systemd unit "enable" symlinks that
+# intentionally point to absolute paths only valid inside the final
+# installed image, such as /usr/lib/systemd/system/*.service) from the
+# submodule dependency list. GNU Make treats an unresolved prerequisite
+# as "no rule to make target", so leaving them in would break the build
+# on any host where those absolute targets don't exist.
+SMDEP_FILES := $(addprefix $(MPATH)/,$(shell cd $(MPATH) && git ls-files | while read -r f; do [ -L "$$f" ] && [ ! -e "$$f" ] && continue; echo "$$f"; done))
 
 $(AC5X_RD98DX35xx_PLATFORM)_CACHE_MODE  := GIT_CONTENT_SHA
 $(AC5X_RD98DX35xx_PLATFORM)_DEP_FLAGS   := $(SONIC_COMMON_FLAGS_LIST)
