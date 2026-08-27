@@ -1,0 +1,203 @@
+<svg width="680" height="765" viewBox="0 0 680 765" xmlns="http://www.w3.org/2000/svg">
+<rect x="0" y="0" width="680" height="765" fill="#FFFFFF"/>
+
+<defs>
+<marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+<path d="M2 1L8 5L2 9" fill="none" stroke="#2C2C2A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+</marker>
+</defs>
+
+<text x="340" y="30" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" font-weight="bold" fill="#000000">SONiC Architecture</text>
+
+<!-- Userspace section -->
+<rect x="30" y="50" width="620" height="445" rx="14" fill="none" stroke="#888780" stroke-width="1.5" stroke-dasharray="7 5"/>
+<text x="45" y="70" font-family="Arial, sans-serif" font-size="13" font-weight="bold" fill="#5F5E5A">Userspace</text>
+
+<!-- Row 1: application containers (homogeneous bold dashed green) -->
+<g stroke="#1D4ED8" stroke-width="3" fill="#FFFFFF">
+<rect x="45" y="90" width="106" height="62" rx="10"/>
+<rect x="163" y="90" width="106" height="62" rx="10"/>
+<rect x="281" y="90" width="106" height="62" rx="10"/>
+<rect x="399" y="90" width="106" height="62" rx="10"/>
+<rect x="517" y="90" width="106" height="62" rx="10"/>
+</g>
+<g font-family="Arial, sans-serif" fill="#1D4ED8" text-anchor="middle" font-weight="bold">
+<text x="98" y="116" font-size="13">bgp</text>
+<text x="98" y="135" font-size="11">container</text>
+<text x="216" y="116" font-size="13">lldp</text>
+<text x="216" y="135" font-size="11">container</text>
+<text x="334" y="116" font-size="13">teamd</text>
+<text x="334" y="135" font-size="11">container</text>
+<text x="452" y="116" font-size="13">snmp</text>
+<text x="452" y="135" font-size="11">container</text>
+<text x="570" y="116" font-size="13">dhcp relay</text>
+<text x="570" y="135" font-size="11">container</text>
+</g>
+
+<!-- Ellipsis: any number of additional application containers can be added here -->
+<g fill="#1D4ED8">
+<circle cx="628" cy="121" r="2.6"/>
+<circle cx="637" cy="121" r="2.6"/>
+<circle cx="646" cy="121" r="2.6"/>
+</g>
+
+<!-- Redis DB: it is a container too, so it is drawn as a rectangle matching the
+     other containers (not a database-cylinder), with its label pinned to the
+     top and its logical DBs shown as dotted sub-boxes in the same brown color. -->
+<rect x="45" y="196" width="200" height="268" rx="14" fill="#FFFFFF" stroke="#A16207" stroke-width="2.4"/>
+<text x="145" y="218" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#A16207">Redis DB</text>
+<text x="145" y="234" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#A16207">container</text>
+
+<!-- Redis DB's logical databases (2 per row, 3 rows) -->
+<g stroke="#A16207" stroke-width="1.4" stroke-dasharray="4 3" fill="none">
+<rect x="55" y="256" width="85" height="62" rx="6"/>
+<rect x="150" y="256" width="85" height="62" rx="6"/>
+<rect x="55" y="326" width="85" height="62" rx="6"/>
+<rect x="150" y="326" width="85" height="62" rx="6"/>
+<rect x="55" y="396" width="85" height="62" rx="6"/>
+<rect x="150" y="396" width="85" height="62" rx="6"/>
+</g>
+<g font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#A16207" text-anchor="middle">
+<text x="98" y="287">APPL_DB</text>
+<text x="193" y="287">CONFIG_DB</text>
+<text x="98" y="357">STATE_DB</text>
+<text x="193" y="357">COUNTER_DB</text>
+<text x="98" y="427">ASIC_DB</text>
+<text x="193" y="427">LOGLEVEL_DB</text>
+</g>
+
+<!-- Arrows: containers -> Redis DB, routed as right-angle (orthogonal) connectors touching only the box's top edge -->
+<g stroke="#2C2C2A" stroke-width="1.6" fill="none" marker-start="url(#arrow)" marker-end="url(#arrow)">
+<path d="M98,152 L98,166 L105,166 L105,196"/>
+<path d="M216,152 L216,166 L122,166 L122,196"/>
+<path d="M334,152 L334,166 L145,166 L145,196"/>
+<path d="M452,152 L452,166 L168,166 L168,196"/>
+<path d="M570,152 L570,166 L185,166 L185,196"/>
+</g>
+
+<!-- Containers that also talk directly to kernel space (netlink, sockets,
+     etc.), not only via Redis DB / syncd / the SAI. To keep this clearly
+     separate from the containers -> Redis DB arrows below them, this is
+     routed from the TOP of each container instead, along a shared bus
+     just above the row (tucked between the "Userspace" label and the
+     row itself, so it stays inside the Userspace box and never crosses
+     that label), then down a single trunk with a comfortable gap to the
+     right of swss/syncd's right edge (x=620) into the kernel space box,
+     so there is only one arrow actually pointing down into kernel space,
+     not one per container. -->
+<g stroke="#2C2C2A" stroke-width="1.6" fill="none" marker-end="url(#arrow)">
+<path d="M98,80 L98,90"/>
+<path d="M334,80 L334,90"/>
+<path d="M452,80 L452,90"/>
+<path d="M570,80 L570,90"/>
+</g>
+<!-- Shared bus tying the risers above together (plain connector, no
+     arrowhead of its own; direction is shown at each riser's end) -->
+<path d="M98,80 L638,80" stroke="#2C2C2A" stroke-width="1.6" fill="none"/>
+<!-- Single trunk carrying the merged bus down into kernel space. It dips
+     into the small natural gap between the 2nd and 3rd ellipsis dots with
+     a short, tight curve (rather than a wide arc around the whole "..."),
+     so it never has to leave the Userspace box to clear them. -->
+<path d="M638,80 L638,115 Q645,121 638,127 L638,520" stroke="#2C2C2A" stroke-width="1.6" fill="none" marker-end="url(#arrow)"/>
+
+<!-- swss container: same column width as syncd below it, wide enough to show
+     its key daemons as dotted sub-boxes -->
+<rect x="290" y="205" width="330" height="125" rx="10" fill="#FFFFFF" stroke="#1D4ED8" stroke-width="3"/>
+<text x="455" y="227" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#1D4ED8">swss - orchagent</text>
+<text x="455" y="243" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#1D4ED8">container</text>
+
+<!-- swss's key daemons (five shown; more may exist) -->
+<g stroke="#1D4ED8" stroke-width="1.4" stroke-dasharray="4 3" fill="none">
+<rect x="294" y="260" width="50" height="48" rx="6"/>
+<rect x="350" y="260" width="50" height="48" rx="6"/>
+<rect x="406" y="260" width="50" height="48" rx="6"/>
+<rect x="462" y="260" width="50" height="48" rx="6"/>
+<rect x="518" y="260" width="50" height="48" rx="6"/>
+</g>
+<g font-family="Arial, sans-serif" font-size="9" font-weight="bold" fill="#1D4ED8" text-anchor="middle">
+<text x="319" y="288">portsyncd</text>
+<text x="375" y="288">neighsyncd</text>
+<text x="431" y="288">orchagent</text>
+<text x="487" y="288">vlanmgrd</text>
+<text x="543" y="288">intfmgrd</text>
+</g>
+<!-- Ellipsis: additional swss managers beyond the five shown -->
+<g fill="#1D4ED8">
+<circle cx="586" cy="284" r="2.6"/>
+<circle cx="596" cy="284" r="2.6"/>
+<circle cx="606" cy="284" r="2.6"/>
+</g>
+
+<!-- Redis DB <-> swss link: stretched so it clearly spans the gap -->
+<line x1="245" y1="268" x2="288" y2="268" stroke="#2C2C2A" stroke-width="1.6" marker-start="url(#arrow)" marker-end="url(#arrow)"/>
+
+<!-- swss also talks directly to kernel space: a short stub (with a clear
+     gap from the swss box) joining the same single trunk used by the
+     containers above, so the trunk stays one continuous downward arrow
+     rather than a second parallel line. -->
+<path d="M638,267 L620,267" stroke="#2C2C2A" stroke-width="1.6" fill="none" marker-end="url(#arrow)"/>
+
+<!-- syncd / gbsyncd containers: syncd on the left under swss; gbsyncd on the right -->
+<rect x="290" y="348" width="228" height="112" rx="12" fill="#FFFFFF" stroke="#4C1D95" stroke-width="2.4"/>
+<text x="404" y="372" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" font-weight="bold" fill="#4C1D95">syncd container</text>
+<text x="404" y="388" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#4C1D95">vendor SDK + SAI</text>
+
+<rect x="552" y="348" width="68" height="112" rx="12" fill="#FFFFFF" stroke="#4C1D95" stroke-width="2.4"/>
+<text x="586" y="396" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" font-weight="bold" fill="#4C1D95">gbsyncd</text>
+<text x="586" y="412" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#4C1D95">container</text>
+
+<!-- syncd <-> gbsyncd (solid double-ended, wider gap for visibility) -->
+<line x1="518" y1="404" x2="552" y2="404" stroke="#2C2C2A" stroke-width="2" marker-start="url(#arrow)" marker-end="url(#arrow)"/>
+
+<!-- Redis DB <-> syncd link -->
+<line x1="245" y1="404" x2="290" y2="404" stroke="#2C2C2A" stroke-width="1.6" marker-start="url(#arrow)" marker-end="url(#arrow)"/>
+
+<!-- SAI API box (inside syncd) -->
+<rect x="318" y="392" width="172" height="50" rx="8" fill="#FFFFFF" stroke="#4C1D95" stroke-width="1.6" stroke-dasharray="5 3"/>
+<text x="404" y="416" text-anchor="middle" font-family="Arial, sans-serif" font-size="11.5" font-weight="bold" fill="#4C1D95">SAI API</text>
+<text x="404" y="432" text-anchor="middle" font-family="Arial, sans-serif" font-size="8.5" font-weight="bold" fill="#4C1D95">Hardware-independent interface</text>
+
+<!-- syncd / SAI API -> ASIC drivers: solid orthogonal connector (left trunk) -->
+<path d="M404,442 L404,508 L340,508 L340,555" stroke="#2C2C2A" stroke-width="2" fill="none" marker-start="url(#arrow)" marker-end="url(#arrow)"/>
+
+<!-- gbsyncd -> SAI API -->
+<path d="M552,418 L490,418" stroke="#4C1D95" stroke-width="2.4" stroke-dasharray="8 5" fill="none" marker-start="url(#arrow)"/>
+
+<!-- ASIC drivers -> SAI API -->
+<path d="M358,555 L358,518 L432,518 L432,442" stroke="#4C1D95" stroke-width="2.4" stroke-dasharray="8 5" fill="none"/>
+
+<!-- ASIC drivers -> PHY -->
+<path d="M358,619 L358,652 L500,652 L500,665" stroke="#4C1D95" stroke-width="2.4" stroke-dasharray="8 5" fill="none" marker-end="url(#arrow)"/>
+
+<!-- Kernel space section -->
+<rect x="30" y="520" width="620" height="110" rx="14" fill="none" stroke="#888780" stroke-width="1.5" stroke-dasharray="7 5"/>
+<text x="45" y="540" font-family="Arial, sans-serif" font-size="13" font-weight="bold" fill="#5F5E5A">Kernel space</text>
+
+<!-- Driver boxes: green dashed, ASIC drivers centered under the row-1 containers -->
+<g stroke="#15803D" stroke-width="2.6" fill="#FFFFFF">
+<rect x="50" y="555" width="180" height="64" rx="10"/>
+<rect x="250" y="555" width="180" height="64" rx="10"/>
+<rect x="450" y="555" width="180" height="64" rx="10"/>
+</g>
+<g font-family="Arial, sans-serif" font-size="13" font-weight="bold" fill="#15803D" text-anchor="middle">
+<text x="140" y="591">Platform drivers</text>
+<text x="340" y="591">ASIC drivers</text>
+<text x="540" y="591">Network drivers</text>
+</g>
+
+<!-- ASIC drivers -> Switch ASIC (solid) -->
+<path d="M340,619 L340,642 L215,642 L215,665" stroke="#2C2C2A" stroke-width="2" fill="none" marker-start="url(#arrow)" marker-end="url(#arrow)"/>
+
+<!-- Switch ASIC and PHY hardware blocks -->
+<rect x="90" y="665" width="250" height="58" rx="12" fill="#FFFFFF" stroke="#C2410C" stroke-width="2.6"/>
+<text x="215" y="691" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#C2410C">Switch ASIC</text>
+<text x="215" y="708" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#C2410C">Packet forwarding hardware</text>
+
+<rect x="380" y="665" width="200" height="58" rx="12" fill="#FFFFFF" stroke="#C2410C" stroke-width="2.6"/>
+<text x="480" y="696" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#C2410C">PHY</text>
+<text x="480" y="712" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#C2410C">Physical layer device</text>
+
+<!-- Switch ASIC <-> PHY (solid double-ended) -->
+<line x1="340" y1="694" x2="380" y2="694" stroke="#2C2C2A" stroke-width="2" marker-start="url(#arrow)" marker-end="url(#arrow)"/>
+
+</svg>

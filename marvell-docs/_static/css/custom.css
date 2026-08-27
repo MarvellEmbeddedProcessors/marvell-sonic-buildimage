@@ -1,0 +1,287 @@
+/* Site-wide: every heading on every page uses a plain sans-serif font,
+   with no bold weight. */
+.bd-content .bd-article h1,
+.bd-content .bd-article h2,
+.bd-content .bd-article h3,
+.bd-content .bd-article h4,
+.bd-content .bd-article h5,
+.bd-content .bd-article h6 {
+  font-family: sans-serif;
+  font-weight: normal;
+}
+
+/* Inline backtick literals in prose: italic, not highlighted monospace.
+   Fenced code blocks (pre > code) keep normal code styling. */
+.bd-article code.literal {
+  font-family: inherit;
+  font-style: italic;
+  font-weight: inherit;
+  font-size: inherit;
+  color: inherit;
+  background: transparent;
+  border: 0;
+  padding: 0;
+  box-shadow: none;
+}
+
+.bd-article pre code,
+.bd-article pre code.literal {
+  font-family: var(--pst-font-family-monospace, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace);
+  font-style: normal;
+  font-size: 0.875rem;
+  color: var(--pst-color-inline-code, #212529);
+  background: transparent;
+}
+
+/* Site-wide: center every table cell (headers and data) across all pages,
+   for both Markdown-rendered and raw HTML tables. */
+.bd-article table.table th,
+.bd-article table.table td {
+  text-align: center;
+}
+
+/* Ensure images using the `:align: center` directive option are actually
+   centered on the page (the theme does not style this by default), with a
+   two-line-height gap above so they don't crowd the heading right before
+   them. */
+.bd-article img.align-center,
+.bd-article .align-center {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 3rem;
+  max-width: 650px;
+}
+
+/* Push the "next page" footer (e.g. "next: Getting Started") much further
+   down, closer to the bottom of the viewport, instead of right after the
+   card grid. */
+.bd-article-container {
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100vh - var(--pst-header-height, 60px) - 120px);
+}
+
+.prev-next-footer {
+  margin-top: auto;
+  padding-top: 4rem;
+}
+
+/* Center the landing page H1 and give it extra space above/below: the
+   top space keeps the title (and the card grid right under it) clear of
+   the navbar's section dropdowns, which float below the header and would
+   otherwise overlap the first row of tiles. */
+section.home-landing > h1 {
+  text-align: center;
+}
+
+.bd-content .bd-article .home-landing > h1 {
+  text-align: center;
+  margin-top: 8rem;
+  margin-bottom: 2.25rem;
+  padding-bottom: 0.25rem;
+}
+
+/* Make the landing-page card grid fluid: instead of Bootstrap's fixed
+   1/2/3-column breakpoints, use CSS Grid with a column count that adapts
+   to viewport width, and a small gap so rows sit close together. Capped
+   (rather than auto-fit) so cards always wrap into tidy rows instead of
+   all packing onto one line on wide screens. */
+.home-landing .sd-row {
+  display: grid !important;
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+  gap: 0.6rem !important;
+  margin: 0 !important;
+}
+
+@media (min-width: 576px) {
+  .home-landing .sd-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 900px) {
+  .home-landing .sd-row {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.home-landing .sd-row > .sd-col {
+  width: auto !important;
+  max-width: none !important;
+  flex: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+/* Landing-page card grid tweaks: let each card size to its own content
+   instead of stretching to match the tallest card in the row. */
+.home-landing .sd-card {
+  height: auto;
+  width: auto;
+  align-self: start;
+  transition: transform 0.25s ease, box-shadow 0.25s ease,
+    border-color 0.25s ease;
+}
+
+.home-landing .sd-card-body {
+  padding: 1.25rem 1rem;
+}
+
+.home-landing .sd-card-title {
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* Crisp, pronounced hover highlight + scale-up for the landing cards. */
+.home-landing .sd-card:hover {
+  transform: scale(1.06);
+  border-color: #000 !important;
+  box-shadow: 0 0.75rem 1.75rem rgba(0, 0, 0, 0.22) !important;
+  z-index: 1;
+}
+
+/* Highlight all level-1 (top-level) entries in the left navigation sidebar
+   with a bold, distinct accent color so they stand out from their nested
+   (level-2+) children. Covers both the per-section toctree (e.g. "Overview"
+   under Getting Started) and the compact top-level section list that the
+   sidebar shows in place of the navbar on narrower viewports. */
+.bd-sidebar-primary nav.bd-links li.toctree-l1 > a.reference,
+.bd-sidebar-primary .sidebar-header-items .nav-link {
+  color: #c2410c !important;
+  font-weight: 700 !important;
+}
+
+.bd-sidebar-primary nav.bd-links li.toctree-l1 > a.reference:hover,
+.bd-sidebar-primary .sidebar-header-items .nav-link:hover {
+  color: #9a3412 !important;
+}
+
+/* Narrow both the left navigation sidebar and the right "on this page"
+   sidebar so more width is available for the main article content. */
+@media (min-width: 992px) {
+  .bd-sidebar-primary {
+    flex: 0 0 13rem !important;
+    width: 13rem !important;
+    max-width: 13rem !important;
+  }
+}
+
+html {
+  --pst-sidebar-secondary: 13rem;
+}
+
+/* Hover animation for the top-level section headlines (About Marvell
+   About, Getting Started, For Developers, Releases, Collaborate) in the
+   navbar: grow slightly on hover (scale, not font-size, to avoid
+   reflowing neighboring links). */
+.bd-navbar-elements .nav-link {
+  display: inline-block;
+  transition: color 0.2s ease, transform 0.2s ease;
+  transform-origin: center;
+}
+
+.bd-navbar-elements .nav-link:hover,
+.bd-navbar-elements .nav-link:focus {
+  color: #000 !important;
+  text-decoration: none !important;
+  border-bottom-color: transparent !important;
+  outline: none !important;
+  box-shadow: none !important;
+  transform: scale(1.15);
+}
+
+/* Per-section hover dropdowns in the navbar: hovering a top-level headline
+   (About, Getting Started, etc.) reveals that section's
+   sub-pages, each of which highlights individually on hover.
+   marvell-docs/_static/js/navbar-dropdown.js toggles the `.show-dropdown` class
+   (with a short close-delay so the menu stays open while the pointer
+   travels down into it); the bare `:hover` rule below is kept only as a
+   harmless no-JS fallback. `!important` is used throughout this block so
+   these rules can never lose a specificity fight with the theme's own
+   bundled dropdown CSS. */
+.bd-navbar-elements .nav-item.bd-navbar-dropdown {
+  position: relative !important;
+}
+
+.bd-navbar-elements .nav-item.bd-navbar-dropdown > .dropdown-menu {
+  display: none !important;
+  position: absolute !important;
+  top: 100% !important;
+  left: 0 !important;
+  margin: 0 !important;
+  min-width: 15rem;
+  padding: 0.4rem 0;
+  border-radius: 0.5rem;
+  box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.18);
+  z-index: 1080 !important;
+}
+
+.bd-navbar-elements .nav-item.bd-navbar-dropdown.show-dropdown > .dropdown-menu,
+.bd-navbar-elements .nav-item.bd-navbar-dropdown:hover > .dropdown-menu,
+.bd-navbar-elements .nav-item.bd-navbar-dropdown > .dropdown-menu:hover {
+  display: block !important;
+}
+
+.bd-navbar-elements .nav-item.bd-navbar-dropdown .dropdown-item {
+  white-space: nowrap;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.bd-navbar-elements .nav-item.bd-navbar-dropdown .dropdown-item:hover,
+.bd-navbar-elements .nav-item.bd-navbar-dropdown .dropdown-item:focus,
+.bd-navbar-elements .nav-item.bd-navbar-dropdown .dropdown-item.active {
+  background-color: #c2410c !important;
+  color: #fff !important;
+}
+
+/* Highlight the SONiC logo/wordmark in the top-left corner of the navbar
+   on hover: a subtle glow plus a slight scale-up. */
+.navbar-brand.logo {
+  display: inline-block;
+  transition: transform 0.2s ease;
+  transform-origin: left center;
+}
+
+.navbar-brand.logo img {
+  transition: filter 0.2s ease;
+}
+
+.navbar-brand.logo:hover {
+  transform: scale(1.08);
+}
+
+.navbar-brand.logo:hover img {
+  filter: drop-shadow(0 0 6px rgba(0, 0, 0, 0.45));
+}
+
+/* Highlight the GitHub icon and the light/dark theme-switcher icon in the
+   top-right corner of the navbar on hover, matching the other navbar
+   hover animations (scale-up, no underline). */
+.pst-navbar-icon {
+  transition: color 0.2s ease, transform 0.2s ease;
+  transform-origin: center;
+}
+
+.pst-navbar-icon:hover,
+.pst-navbar-icon:focus {
+  color: #000 !important;
+  transform: scale(1.2);
+}
+
+/* Highlight the "previous"/"next" page chain at the bottom of each article
+   on hover: a soft background + shadow behind the link, and a slight
+   scale-up, consistent with the landing-page card hover style. */
+.prev-next-area a.left-prev,
+.prev-next-area a.right-next {
+  border-radius: 0.5rem;
+  transition: transform 0.2s ease, box-shadow 0.2s ease,
+    background-color 0.2s ease;
+}
+
+.prev-next-area a.left-prev:hover,
+.prev-next-area a.right-next:hover {
+  transform: scale(1.04);
+  background-color: rgba(0, 0, 0, 0.05);
+  box-shadow: 0 0.5rem 1.25rem rgba(0, 0, 0, 0.15);
+}

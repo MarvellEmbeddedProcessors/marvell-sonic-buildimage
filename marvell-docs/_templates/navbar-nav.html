@@ -1,0 +1,74 @@
+{# Custom override of the theme's navbar-nav component.
+
+   The stock theme only turns *overflow* links (past a fixed count) into a
+   "More" dropdown; it has no concept of a per-section dropdown of that
+   section's own sub-pages. Here we render each top-level section as its own
+   hover-dropdown, listing that section's immediate sub-pages, so visitors
+   can jump straight to a sub-page without first landing on the section's
+   index page.
+
+   NOTE: this list is intentionally hand-maintained to mirror each section's
+   own `{toctree}` in its `index.md` (see marvell-docs/SONIC/*/index.md). If you
+   add/remove/reorder a section's sub-pages, update the matching entry below
+   too. #}
+{% set nav_sections = [
+  {
+    "title": "About",
+    "doc": "SONIC/about/index",
+    "children": [
+      ("What is SONiC", "SONIC/about/what-is-sonic"),
+      ("Why Prestera SONiC", "SONIC/about/why-marvell-sonic"),
+    ],
+  },
+  {
+    "title": "Getting Started",
+    "doc": "SONIC/getting-started/index",
+    "children": [
+      ("Marvell Prestera Platforms", "SONIC/getting-started/marvell-prestera/index"),
+      ("Build", "SONIC/getting-started/build/index"),
+      ("Deploy Prestera SONiC", "SONIC/getting-started/deploy-sonic-on-marvell-prestera/index"),
+    ],
+  },
+  {
+    "title": "For Developers",
+    "doc": "SONIC/developers/index",
+    "children": [
+      ("Prestera SONiC Repositories", "SONIC/developers/know-marvell-sonic-repositories"),
+      ("WhiteModel Development", "SONIC/developers/whitemodel-development/index"),
+    ],
+  },
+  {
+    "title": "Releases",
+    "doc": "SONIC/releases/index",
+    "children": [
+      ("Details", "SONIC/releases/details"),
+      ("rls-01.202511.01", "SONIC/releases/rls-01.202511.01"),
+    ],
+  },
+  {
+    "title": "Collaborate",
+    "doc": "SONIC/collaborate/index",
+    "children": [
+      ("How to Contribute", "SONIC/collaborate/how-to-contribute"),
+      ("Raise Issues", "SONIC/collaborate/raise-issues"),
+    ],
+  },
+] %}
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    {% for section in nav_sections %}
+      {% set section_root = section.doc.rsplit('/', 1)[0] %}
+      <li class="nav-item dropdown bd-navbar-dropdown">
+        <a class="nav-link nav-internal{{ ' current active' if pagename == section.doc or pagename.startswith(section_root ~ '/') else '' }}"
+           href="{{ pathto(section.doc) }}">{{ section.title }}</a>
+        {% if section.children %}
+          <ul class="dropdown-menu">
+            {% for child_title, child_doc in section.children %}
+              <li><a class="dropdown-item{{ ' active' if pagename == child_doc else '' }}" href="{{ pathto(child_doc) }}">{{ child_title }}</a></li>
+            {% endfor %}
+          </ul>
+        {% endif %}
+      </li>
+    {% endfor %}
+  </ul>
+</nav>
