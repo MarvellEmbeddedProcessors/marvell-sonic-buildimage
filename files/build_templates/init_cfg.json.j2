@@ -107,6 +107,7 @@
 {%- if include_dhcp_server == "y" %}{% do features.append(("dhcp_server", feat_enable(enable_dhcp_server), feat_delay(delay_dhcp_server), feat_autorestart(autorestart_dhcp_server))) %}{% endif %}
 {%- if sonic_asic_platform == "vs" %}{% do features.append(("gbsyncd", "enabled", false, "enabled")) %}{% endif %}
 {%- if include_iccpd == "y" %}{% do features.append(("iccpd", feat_enable(enable_iccpd), feat_delay(delay_iccpd), feat_autorestart(autorestart_iccpd))) %}{% endif %}
+{%- if include_stp == "y" %}{% do features.append(("stp", feat_enable(enable_stp), feat_delay(delay_stp), feat_autorestart(autorestart_stp))) %}{% endif %}
 {%- if include_mgmt_framework == "y" %}{% do features.append(("mgmt-framework", feat_enable(enable_mgmt_framework), feat_delay(delay_mgmt_framework), feat_autorestart(autorestart_mgmt_framework))) %}{% endif %}
 {%- if include_mux == "y" %}
 {%- if enable_mux == "y" %}
