@@ -1,0 +1,24 @@
+# Per-release metadata for the "Releases > Details" table.
+#
+# The list of releases shown in that table is auto-discovered from the repo's
+# git tags (any tag named "rls-<major>.<sonic>.<minor>", e.g. rls-01.202511.01)
+# by _scripts/gen_releases_table.py. A tag name only carries the tag/branch, so
+# this file supplies the remaining columns (SAI versions, date, lifecycle).
+#
+# When you cut a new release tag, add a matching entry here (keyed by the tag).
+# Tags without an entry still appear in the table, with "TBD" for these fields.
+#
+# Fields per release:
+#   marvell_sai:  Marvell SAI version string.
+#   ocp_sai:      OCP SAI label shown in the table.
+#   ocp_sai_url:  Link target for the OCP SAI label.
+#   release_date: Release date (or "TBD").
+#   lifecycle:    One of the states documented on the Details page
+#                 (In Development / Released Active / Released Inactive).
+releases:
+  rls-01.202511.01:
+    marvell_sai: "7.0.1"
+    ocp_sai: "SAI-1.17.1"
+    ocp_sai_url: "https://github.com/opencomputeproject/SAI/releases/tag/v1.17.1"
+    release_date: "TBD"
+    lifecycle: "In Development"

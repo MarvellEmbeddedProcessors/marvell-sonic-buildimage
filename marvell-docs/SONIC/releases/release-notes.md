@@ -1,4 +1,4 @@
-# rls-01.202511.01
+# {{ release_tag }}
 
 ## SONiC Base Commit
 

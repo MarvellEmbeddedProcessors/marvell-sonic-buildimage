@@ -90,6 +90,14 @@ that section's `index.md`.
   `marvell-docs/_static/images/marvell_sonic_logo.png`) and reference them with a
   path rooted at `_static/`, e.g. `![alt text](/_static/images/foo.png)`
   or via `html_logo` / `html_favicon` in `conf.py`.
+- **Generated images**: the release-naming diagram
+  (`SONIC/about/images/release-naming-convention.svg`) is *generated at build
+  time* by [`_scripts/gen_release_naming_svg.py`](_scripts/gen_release_naming_svg.py)
+  (run from `conf.py`) off the branch-derived `version`, so the private and
+  public mirrors each render the correct convention from the same synced source.
+  It's git-ignored — don't hand-edit or commit it; change the generator instead.
+  Preview it manually with
+  `RELEASE_VERSION=01.202511.01 python marvell-docs/_scripts/gen_release_naming_svg.py`.
 
 ## Layout
 
@@ -131,7 +139,7 @@ marvell-docs/
     ├── releases/                  Releases
     │   ├── index.md
     │   ├── details.md
-    │   └── rls-01.202511.01.md
+    │   └── release-notes.md
     └── collaborate/               Collaborate
         ├── index.md
         ├── how-to-contribute.md
@@ -162,10 +170,71 @@ create one for you.
 
 ## Publishing to GitHub Pages
 
-[`.github/workflows/docs.yml`](../.github/workflows/docs.yml) builds the docs
-on every push/PR touching `marvell-docs/**`, and deploys the result to GitHub Pages
-on pushes to `main`.
+[`.github/workflows/docs.yml`](../.github/workflows/docs.yml) has two jobs. The
+**build** job compiles the docs on every push (a broken build fails CI thanks to
+`sphinx-build -W`; that run also shows up as a check on any open PR for the same
+commit). The **deploy** job publishes to GitHub Pages via the **native GitHub
+Actions Pages flow** (`actions/upload-pages-artifact` + `actions/deploy-pages`)
+— there is **no `gh-pages` branch** — and only runs when a **release tag** or the
+repo's **default branch** is pushed.
+
+Naming convention (both drive the derived docs `version` in [`conf.py`](conf.py),
+which strips the `rls-` prefix):
+
+| Ref | Example | Docs `version` | Deployed? |
+|-----|---------|----------------|-----------|
+| default branch | `rls-202511.01` | `202511.01` | yes → `/<version>/`, marked "(latest)", root redirect target |
+| other branch | `rls-…` / any | derived / `master` | no — build/validate only |
+| tag | `rls-01.202511.01` | `01.202511.01` | yes → `/<version>/` |
+
+A deployed release is always the **tag** form. The release-notes page title
+shows the derived `{{ release_tag }}` (so each release's notes are headed by its
+own tag) and the naming diagram is rendered from the derived `version`. The
+Releases > Details table is generated from the repo's release tags (see
+[`_scripts/gen_releases_table.py`](_scripts/gen_releases_table.py); per-release
+metadata lives in [`SONIC/releases/releases.yaml`](SONIC/releases/releases.yaml))
+and links each tag to that release's notes, so no version string or release list
+is baked into the source.
+
+Because the native Pages deploy replaces the whole site with a single artifact,
+the deploy job **rebuilds every version on each run**: it checks out the default
+branch and each `rls-*` tag in turn, builds each with `GITHUB_REF_NAME` set to
+that ref (so `conf.py` renders the right version with no per-ref edits), and
+assembles them into one site tree:
+
+```
+https://<pages-host>/                 # redirect to the default branch's version
+https://<pages-host>/versions.json    # the list the switcher reads
+https://<pages-host>/<version>/       # docs from the default branch or an rls-* tag
+```
+
+The exact `<pages-host>` is resolved by `actions/configure-pages`, so it works on
+github.com, GitHub Enterprise, and custom-domain/private `*.pages.github.io`
+hosts alike, with no host hard-coded. A version appears only if its ref (the
+default branch or an `rls-*` tag) still builds.
+
+The version switcher list (`versions.json`) is **generated automatically** on
+every deploy by [`_scripts/gen_versions_json.py`](_scripts/gen_versions_json.py),
+which scans the `<version>/` folders just built. So the dropdown always reflects
+what's deployed and there is **no file to hand-maintain**. The switcher's
+`json_url` uses the same resolved Pages URL. (pydata-sphinx-theme requires a
+fully-resolved `json_url`; relative paths are not supported. Its build-time
+switcher fetch is disabled via `check_switcher: False` in `conf.py`, so the list
+is only read client-side after deploy and the build never fails on it.) For local
+preview, set `DOCS_SWITCHER_JSON_URL` to point the switcher at a served file.
 
 One-time repo setup required: in **Settings → Pages**, set **Source** to
-**GitHub Actions**. After that, the site is published automatically at
-`https://<org>.github.io/<repo>/` whenever `main` is updated.
+**GitHub Actions**. (The same setting is needed on the public mirror repo.)
+
+### Publishing a new release version
+
+1. Tag the release commit `rls-<major>.<sonic>.<minor>` (e.g. `rls-01.202511.01`)
+   and push the tag. `conf.py` derives the `<version>` subfolder (`01.202511.01`)
+   and the switcher's `version_match` from it — nothing to edit in `conf.py`.
+2. That's it. The workflow rebuilds all versions, adds the `01.202511.01/`
+   subfolder, and **regenerates `versions.json`** so the new version shows up in
+   the dropdown — no file to edit. You can also re-run it on a tag via **Run
+   workflow**.
+
+> The switcher URL comes from the repo's own GitHub Pages site (resolved by
+> `actions/configure-pages`), so nothing needs editing per repo or per host.

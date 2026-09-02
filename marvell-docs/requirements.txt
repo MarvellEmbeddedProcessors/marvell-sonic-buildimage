@@ -9,3 +9,11 @@ myst-parser==5.1.0
 pydata-sphinx-theme==0.20.0
 sphinx-copybutton==0.5.2
 sphinx-design==0.7.0
+
+# Used by _scripts/gen_release_naming_svg.py, which conf.py runs at build time
+# to (re)generate SONIC/about/images/release-naming-convention.svg.
+matplotlib==3.11.1
+
+# Used by _scripts/gen_releases_table.py to read SONIC/releases/releases.yaml
+# (per-release metadata) when generating the Releases > Details table.
+PyYAML==6.0.2

@@ -42,7 +42,7 @@
     "doc": "SONIC/releases/index",
     "children": [
       ("Details", "SONIC/releases/details"),
-      ("rls-01.202511.01", "SONIC/releases/rls-01.202511.01"),
+      (release_tag, "SONIC/releases/release-notes"),
     ],
   },
   {
@@ -64,7 +64,11 @@
         {% if section.children %}
           <ul class="dropdown-menu">
             {% for child_title, child_doc in section.children %}
+              {# The release-notes entry names a specific release, so show it
+                 only on release-tag builds (is_release via html_context). #}
+              {% if not (child_doc == "SONIC/releases/release-notes" and not is_release) %}
               <li><a class="dropdown-item{{ ' active' if pagename == child_doc else '' }}" href="{{ pathto(child_doc) }}">{{ child_title }}</a></li>
+              {% endif %}
             {% endfor %}
           </ul>
         {% endif %}

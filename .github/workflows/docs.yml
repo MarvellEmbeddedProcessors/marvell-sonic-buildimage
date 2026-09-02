@@ -1,0 +1,215 @@
+name: Docs
+
+# Build the Sphinx documentation in marvell-docs/ on EVERY push (so broken docs
+# fail CI thanks to `sphinx-build -W`; that run also surfaces as a check on any
+# open PR for the same commit), and DEPLOY to GitHub Pages -- via the native
+# GitHub Actions Pages flow (actions/upload-pages-artifact + actions/deploy-pages),
+# NOT a gh-pages branch -- when either a release tag OR the repo's default branch
+# is pushed.
+#
+# Naming convention:
+#   * branches are named "rls-<sonic>.<minor>"        (e.g. rls-202511.01)
+#   * release tags are named "rls-<major>.<sonic>.<minor>" (e.g. rls-01.202511.01)
+# conf.py derives the docs `version` from the ref name (strip "rls-", else
+# "master"), so a deployed release is always the tag form (e.g. "01.202511.01").
+#
+# Multi-version layout: because the native Pages deploy replaces the whole site
+# with a single artifact, the deploy job REBUILDS EVERY VERSION on each run by
+# checking out each ref in turn. The set of versions is:
+#   * the default branch, marked "(latest)" and used for the root redirect
+#   * every "rls-*" tag
+# Each ref is built with GITHUB_REF_NAME set to that ref, so conf.py renders the
+# correct version/release_tag with no per-ref edits.
+#
+#   /                 -> redirect to the default branch's version
+#   /versions.json    -> the list the switcher reads (generated, not maintained)
+#   /<version>/       -> docs built from the default branch or an "rls-*" tag
+#
+# One-time repo setup: Settings -> Pages -> Source = "GitHub Actions".
+
+on:
+  push:
+    branches:
+      - '**'
+    tags:
+      - 'rls-*'
+  workflow_dispatch:
+
+# Least privilege by default; the deploy job widens this for the Pages deploy.
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build docs (validate)
+    runs-on: ubuntu-latest
+    # Validate the pushed ref on every push. Superseded validation builds may be
+    # cancelled since they're cheap to re-run.
+    concurrency:
+      group: docs-build-${{ github.ref }}
+      cancel-in-progress: true
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: marvell-docs/requirements.txt
+
+      - name: Install doc-build dependencies
+        run: pip install -r marvell-docs/requirements.txt
+
+      - name: Build HTML docs
+        # `-W` (set in the Makefile) turns warnings into errors, so broken docs
+        # fail here. The switcher isn't fetched at build time (check_switcher is
+        # False in conf.py), so no Pages URL is needed just to validate.
+        run: make -C marvell-docs html
+
+  deploy:
+    name: Deploy docs to Pages
+    needs: build
+    # Deploy on release tags and on the default branch; other pushes/PRs only
+    # validate (the build job above).
+    if: github.ref_type == 'tag' || github.ref_name == github.event.repository.default_branch
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    # Never cancel an in-progress Pages deploy; serialize them instead.
+    concurrency:
+      group: pages
+      cancel-in-progress: false
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          # Full history + tags: the deploy loop checks out every rls-* tag and
+          # the default branch to rebuild all versions.
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: marvell-docs/requirements.txt
+
+      - name: Install doc-build dependencies
+        run: pip install -r marvell-docs/requirements.txt
+
+      - name: Configure Pages
+        id: pages
+        # Resolves this repo's real Pages base URL (works on github.com, GitHub
+        # Enterprise, and custom-domain/private *.pages.github.io hosts). Used for
+        # the switcher's json_url and the version links in versions.json.
+        uses: actions/configure-pages@v5
+
+      - name: Build all versions
+        env:
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+          BASE_URL: ${{ steps.pages.outputs.base_url }}
+        run: |
+          set -euo pipefail
+
+          BASE="${BASE_URL%/}"
+          SITE="${RUNNER_TEMP}/site"
+          rm -rf "$SITE"
+          mkdir -p "$SITE"
+
+          # Remember the triggering commit: it has the current tooling
+          # (gen_versions_json.py, the redirect below). We return to it after the
+          # loop, which may leave us checked out on an older ref.
+          orig_sha="$(git rev-parse HEAD)"
+
+          # Docs version of the default branch (same rule as conf.py: strip the
+          # "rls-" prefix, else "master"). Marked "(latest)" and the redirect target.
+          case "${DEFAULT_BRANCH}" in
+            rls-*) default_version="${DEFAULT_BRANCH#rls-}" ;;
+            *)     default_version="master" ;;
+          esac
+
+          # Build one ref into $SITE/<version>/. $1 = git ref to checkout,
+          # $2 = human ref name passed to conf.py via GITHUB_REF_NAME.
+          build_one() {
+            checkout_ref="$1"
+            name="$2"
+            echo "::group::Building $name"
+            git checkout -f "$checkout_ref"
+            if [ ! -f marvell-docs/Makefile ]; then
+              echo "No marvell-docs/ at $name; skipping"
+              echo "::endgroup::"
+              return 0
+            fi
+            case "$name" in
+              rls-*) v="${name#rls-}" ;;
+              *)     v="master" ;;
+            esac
+            rm -rf marvell-docs/_build
+            GITHUB_REF_NAME="$name" DOCS_SWITCHER_JSON_URL="$BASE/versions.json" \
+              make -C marvell-docs html
+            rm -rf "${SITE:?}/$v"
+            mkdir -p "$SITE/$v"
+            cp -R marvell-docs/_build/html/. "$SITE/$v/"
+            rm -rf "$SITE/$v/.doctrees"
+            echo "Built '$name' as version '$v'"
+            echo "::endgroup::"
+          }
+
+          # Default branch first (latest), then every rls-* tag.
+          build_one "origin/${DEFAULT_BRANCH}" "${DEFAULT_BRANCH}"
+          while read -r tag; do
+            [ -n "$tag" ] || continue
+            build_one "$tag" "$tag"
+          done < <(git tag -l 'rls-*')
+
+          # Back to the triggering commit so the current tooling is used below.
+          git checkout -f "$orig_sha"
+
+          if [ -z "$(ls -A "$SITE")" ]; then
+            echo "::error::No versions were built; nothing to deploy" >&2
+            exit 1
+          fi
+
+          # Regenerate the switcher list from the folders just built, so the
+          # dropdown always reflects what's deployed with no file to maintain.
+          python3 marvell-docs/_scripts/gen_versions_json.py \
+            "$SITE" "$default_version" "$BASE"
+
+          # Site-root redirect to the default branch's version. The heredoc body
+          # and closing delimiter sit at the YAML block-scalar indent (10 spaces);
+          # YAML strips that, so the shell sees "HTML" at column 0 and the heredoc
+          # terminates correctly.
+          cat > "$SITE/index.html" <<HTML
+          <!DOCTYPE html>
+          <html lang="en">
+            <head>
+              <meta charset="utf-8">
+              <meta http-equiv="refresh" content="0; url=./$default_version/">
+              <link rel="canonical" href="./$default_version/">
+              <title>Prestera SONiC Documentation</title>
+            </head>
+            <body>
+              Redirecting to <a href="./$default_version/">./$default_version/</a>&hellip;
+            </body>
+          </html>
+          HTML
+
+          echo "Assembled site with versions:"
+          ls -1 "$SITE"
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ${{ runner.temp }}/site
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
