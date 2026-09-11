@@ -47,7 +47,9 @@ SERVE=0
 USE_VENV=0
 DEFAULT_BRANCH="$(git -C "$REPO_ROOT" rev-parse --abbrev-ref HEAD)"
 
-usage() { sed -n '2,45p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'; }
+# Print the header comment block (lines after the shebang, up to the first
+# non-comment line), stripping the leading "# ". Robust to line-number changes.
+usage() { awk 'NR==1{next} /^#/{sub(/^# ?/,"");print;next} {exit}' "${BASH_SOURCE[0]}"; }
 
 while [ $# -gt 0 ]; do
   case "$1" in
@@ -82,7 +84,8 @@ ref_version() {
 if [ "$USE_VENV" = 1 ]; then
   VENV="$DOCS_DIR/_build/.venv"
   echo "==> Setting up venv at $VENV"
-  python3 -m venv "$VENV"
+  # Reuse an existing venv; only create it when missing (safe to rerun).
+  [ -x "$VENV/bin/python" ] || python3 -m venv "$VENV"
   # shellcheck disable=SC1091
   . "$VENV/bin/activate"
   pip install --quiet --upgrade pip
@@ -156,6 +159,15 @@ if [ -z "$(ls -A "$SITE")" ]; then
 fi
 
 default_version="$(ref_version "$DEFAULT_BRANCH")"
+
+# The root redirect points at the default version, so that build must exist.
+# (build_ref skips missing/marvell-docs-less refs; catch that here for the
+# default ref instead of emitting a site that redirects to a 404.)
+if [ ! -d "$SITE/$default_version" ]; then
+  echo "error: default ref '$DEFAULT_BRANCH' (version '$default_version') was not built;" >&2
+  echo "       cannot assemble a site whose root redirect would 404." >&2
+  exit 1
+fi
 
 # Switcher list + root redirect (same tooling the workflow uses).
 python3 "$DOCS_DIR/_scripts/gen_versions_json.py" "$SITE" "$default_version" "$BASE"

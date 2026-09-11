@@ -14,6 +14,15 @@ sphinx-design==0.7.0
 # (per-release metadata) when generating the Releases > Details table.
 PyYAML==6.0.2
 
-# NOTE: _scripts/gen_release_naming_svg.py needs matplotlib, but it is NOT run
-# at build time -- SONIC/about/images/release-naming-convention.svg is a
-# committed static asset. Install matplotlib separately only to regenerate it.
+# The current build no longer generates the release-naming diagram: it ships as
+# a committed static asset (SONIC/about/images/release-naming-convention.svg),
+# and _scripts/gen_release_naming_svg.py is only a one-off manual regenerator.
+#
+# matplotlib is nonetheless RETAINED here because the multi-version Pages deploy
+# (.github/workflows/docs.yml) installs THIS requirements file once, then
+# rebuilds every existing "rls-*" tag using that tag's own conf.py -- and older
+# tags still generate the SVG at build time (import gen_release_naming_svg,
+# which needs matplotlib). Dropping it would break those legacy-tag rebuilds
+# with ModuleNotFoundError. Remove it only once no deployed tag generates the
+# SVG at build time (e.g. after all such tags are re-cut).
+matplotlib==3.11.1

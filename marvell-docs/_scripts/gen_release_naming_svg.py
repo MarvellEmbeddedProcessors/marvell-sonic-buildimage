@@ -7,8 +7,7 @@ The release-naming diagram illustrates the canonical release *tag* form
 This is a ONE-OFF manual generator: the convention is fixed, so
 ``SONIC/about/images/release-naming-convention.svg`` is a COMMITTED static asset
 and is NOT regenerated at build time. Run this script only if the convention
-itself changes, then commit the updated SVG. (Requires matplotlib installed
-separately -- it is intentionally not in requirements.txt.)
+itself changes, then commit the updated SVG.
 
 ``render`` still accepts a version so the diagram can reflect a specific tag:
 
@@ -23,7 +22,9 @@ To (re)produce the committed SVG:
     python marvell-docs/_scripts/gen_release_naming_svg.py            # from $GITHUB_REF_NAME
     RELEASE_VERSION=01.202511.01 python marvell-docs/_scripts/gen_release_naming_svg.py
 
-Requires matplotlib (in ``marvell-docs/requirements.txt``).
+Requires matplotlib. It is still listed in ``marvell-docs/requirements.txt`` --
+not for this script, but because the multi-version Pages deploy rebuilds older
+``rls-*`` tags whose ``conf.py`` still generates the SVG at build time.
 """
 from __future__ import annotations
 
