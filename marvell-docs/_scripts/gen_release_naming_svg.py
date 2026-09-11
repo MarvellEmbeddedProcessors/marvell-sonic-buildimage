@@ -1,10 +1,16 @@
 #!/usr/bin/env python3
 """Generate ``SONIC/about/images/release-naming-convention.svg``.
 
-The release-naming diagram is a *generated* image that always illustrates the
-canonical release *tag* form ``rls-<major>.<sonic>.<minor>`` (with the "Marvell
-Release Major No." callout). It is (re)built at docs-build time via a Sphinx
-``setup()`` hook in ``conf.py`` without a committed, hand-maintained image:
+The release-naming diagram illustrates the canonical release *tag* form
+``rls-<major>.<sonic>.<minor>`` (with the "Marvell Release Major No." callout).
+
+This is a ONE-OFF manual generator: the convention is fixed, so
+``SONIC/about/images/release-naming-convention.svg`` is a COMMITTED static asset
+and is NOT regenerated at build time. Run this script only if the convention
+itself changes, then commit the updated SVG. (Requires matplotlib installed
+separately -- it is intentionally not in requirements.txt.)
+
+``render`` still accepts a version so the diagram can reflect a specific tag:
 
 * tag    ``rls-<major>.<sonic>.<minor>``  e.g. ``rls-01.202511.01`` (3 parts)
   -- uses the tag's own numbers.
@@ -12,8 +18,7 @@ Release Major No." callout). It is (re)built at docs-build time via a Sphinx
   and non-release builds -- fall back to the representative sample tag so the
   full convention (including the major) is still shown (see ``render``).
 
-The generated SVG is git-ignored (regenerated on every build). To produce it
-manually (e.g. to eyeball a change):
+To (re)produce the committed SVG:
 
     python marvell-docs/_scripts/gen_release_naming_svg.py            # from $GITHUB_REF_NAME
     RELEASE_VERSION=01.202511.01 python marvell-docs/_scripts/gen_release_naming_svg.py

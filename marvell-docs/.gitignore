@@ -2,9 +2,6 @@ _build/
 .venv/
 __pycache__/
 
-# Generated at build time by _scripts/gen_release_naming_svg.py (see conf.py).
-SONIC/about/images/release-naming-convention.svg
-
 # Generated at build time by _scripts/gen_releases_table.py (see conf.py).
 SONIC/releases/_releases_table.md
 

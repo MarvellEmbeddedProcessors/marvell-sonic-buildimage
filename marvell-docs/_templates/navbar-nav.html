@@ -2,15 +2,17 @@
 
    The stock theme only turns *overflow* links (past a fixed count) into a
    "More" dropdown; it has no concept of a per-section dropdown of that
-   section's own sub-pages. Here we render each top-level section as its own
-   hover-dropdown, listing that section's immediate sub-pages, so visitors
+   section's own sub-pages. Here we render each top-level section that has
+   "children" as its own hover-dropdown listing those sub-pages, so visitors
    can jump straight to a sub-page without first landing on the section's
-   index page.
+   index page. A section with no "children" renders as a plain standalone tab
+   linking to whatever `doc` it points at (e.g. Releases -> its Details page,
+   so clicking the tab lands directly on Details).
 
-   NOTE: this list is intentionally hand-maintained to mirror each section's
-   own `{toctree}` in its `index.md` (see marvell-docs/SONIC/*/index.md). If you
-   add/remove/reorder a section's sub-pages, update the matching entry below
-   too. #}
+   NOTE: the "children" lists are intentionally hand-maintained to mirror each
+   section's own `{toctree}` in its `index.md` (see marvell-docs/SONIC/*/index.md).
+   If you add/remove/reorder a section's sub-pages, update the matching entry
+   below too. #}
 {% set nav_sections = [
   {
     "title": "About",
@@ -39,11 +41,7 @@
   },
   {
     "title": "Releases",
-    "doc": "SONIC/releases/index",
-    "children": [
-      ("Details", "SONIC/releases/details"),
-      (release_tag, "SONIC/releases/release-notes"),
-    ],
+    "doc": "SONIC/releases/details",
   },
   {
     "title": "Collaborate",
@@ -58,21 +56,25 @@
   <ul class="bd-navbar-elements navbar-nav">
     {% for section in nav_sections %}
       {% set section_root = section.doc.rsplit('/', 1)[0] %}
-      <li class="nav-item dropdown bd-navbar-dropdown">
-        <a class="nav-link nav-internal{{ ' current active' if pagename == section.doc or pagename.startswith(section_root ~ '/') else '' }}"
-           href="{{ pathto(section.doc) }}">{{ section.title }}</a>
-        {% if section.children %}
+      {% set current = pagename == section.doc or pagename.startswith(section_root ~ '/') %}
+      {% if section.children %}
+        {# Section with a hover-dropdown of its sub-pages. #}
+        <li class="nav-item dropdown bd-navbar-dropdown">
+          <a class="nav-link nav-internal{{ ' current active' if current else '' }}"
+             href="{{ pathto(section.doc) }}">{{ section.title }}</a>
           <ul class="dropdown-menu">
             {% for child_title, child_doc in section.children %}
-              {# The release-notes entry names a specific release, so show it
-                 only on release-tag builds (is_release via html_context). #}
-              {% if not (child_doc == "SONIC/releases/release-notes" and not is_release) %}
               <li><a class="dropdown-item{{ ' active' if pagename == child_doc else '' }}" href="{{ pathto(child_doc) }}">{{ child_title }}</a></li>
-              {% endif %}
             {% endfor %}
           </ul>
-        {% endif %}
-      </li>
+        </li>
+      {% else %}
+        {# Standalone tab: a plain link with no dropdown (e.g. Releases). #}
+        <li class="nav-item">
+          <a class="nav-link nav-internal{{ ' current active' if current else '' }}"
+             href="{{ pathto(section.doc) }}">{{ section.title }}</a>
+        </li>
+      {% endif %}
     {% endfor %}
   </ul>
 </nav>

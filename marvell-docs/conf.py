@@ -7,7 +7,7 @@ import sys
 from datetime import datetime
 
 # Make the dev/build helpers under _scripts/ importable (e.g. the generator for
-# the release-naming SVG, which is rebuilt at build time -- see setup() below).
+# the Releases > Details table, which is rebuilt at build time -- see setup()).
 _CONFDIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(_CONFDIR, "_scripts"))
 
@@ -58,9 +58,8 @@ release_tag = f"rls-{version}"
 # yields a 3-part version ("01.202511.01"); a branch yields 2 parts
 # ("202511.01") and everything else is "master". Only release tags get a
 # release-notes entry (branches are in-development, not a release): the
-# release-notes toctree entry is generated in setup() only when this is true
-# (so it's absent from the section nav on branch builds), and the navbar drops
-# it too (via html_context) -- see _templates/navbar-nav.html.
+# release-notes toctree entry is generated in setup() only when this is true, so
+# it's absent from the section nav on branch/local builds.
 is_release = bool(re.fullmatch(r"\d+\.\d+\.\d+", version))
 
 html_title = ""
@@ -125,10 +124,6 @@ html_css_files = ["css/custom.css"]
 html_js_files = ["js/navbar-dropdown.js"]
 html_show_sourcelink = False
 
-# Expose the derived release tag and the release/non-release flag to custom
-# templates (the navbar drops the release-notes entry on non-release builds).
-html_context = {"release_tag": release_tag, "is_release": is_release}
-
 # Remove sidebar on the card-based landing page.
 html_sidebars = {"index": []}
 
@@ -178,23 +173,18 @@ html_theme_options = {
 def setup(app):
     """Regenerate derived assets at build time.
 
-    Both assets are git-ignored and rebuilt here before the docs are read:
+    These are git-ignored and rebuilt here before the docs are read:
 
-    * The release-naming diagram is rendered from the (branch-derived) `version`
-      so the same synced source produces the correct convention in each repo.
     * The Releases > Details table is generated from the repo's release tags
       (see _scripts/gen_releases_table.py) and pulled into details.md via
       {include}, so it lists every release without a hand-maintained table.
+
+    (The release-naming diagram is now a committed static SVG -- its convention
+    is fixed -- so it is no longer generated here. Regenerate it manually with
+    _scripts/gen_release_naming_svg.py only if the convention changes.)
     """
-    from gen_release_naming_svg import render as render_naming_svg
     from gen_releases_table import render as render_releases_table
 
-    render_naming_svg(
-        version,
-        out_path=os.path.join(
-            _CONFDIR, "SONIC", "about", "images", "release-naming-convention.svg"
-        ),
-    )
     render_releases_table(
         os.path.join(_CONFDIR, "SONIC", "releases", "_releases_table.md")
     )

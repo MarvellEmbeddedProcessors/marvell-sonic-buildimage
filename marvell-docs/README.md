@@ -90,14 +90,12 @@ that section's `index.md`.
   `marvell-docs/_static/images/marvell_sonic_logo.png`) and reference them with a
   path rooted at `_static/`, e.g. `![alt text](/_static/images/foo.png)`
   or via `html_logo` / `html_favicon` in `conf.py`.
-- **Generated images**: the release-naming diagram
-  (`SONIC/about/images/release-naming-convention.svg`) is *generated at build
-  time* by [`_scripts/gen_release_naming_svg.py`](_scripts/gen_release_naming_svg.py)
-  (run from `conf.py`) off the branch-derived `version`, so the private and
-  public mirrors each render the correct convention from the same synced source.
-  It's git-ignored — don't hand-edit or commit it; change the generator instead.
-  Preview it manually with
-  `RELEASE_VERSION=01.202511.01 python marvell-docs/_scripts/gen_release_naming_svg.py`.
+- **Release-naming diagram**: `SONIC/about/images/release-naming-convention.svg`
+  is a **committed static asset** — the convention is fixed, so it is *not*
+  generated at build time. If the convention ever changes, regenerate it with
+  [`_scripts/gen_release_naming_svg.py`](_scripts/gen_release_naming_svg.py)
+  (`RELEASE_VERSION=01.202511.01 python marvell-docs/_scripts/gen_release_naming_svg.py`,
+  needs `matplotlib` installed separately) and commit the updated SVG.
 
 ## Layout
 
@@ -189,8 +187,7 @@ which strips the `rls-` prefix):
 
 A deployed release is always the **tag** form. The release-notes page title
 shows the derived `{{ release_tag }}` (so each release's notes are headed by its
-own tag) and the naming diagram is rendered from the derived `version`. The
-Releases > Details table is generated from the repo's release tags (see
+own tag). The Releases > Details table is generated from the repo's release tags (see
 [`_scripts/gen_releases_table.py`](_scripts/gen_releases_table.py); per-release
 metadata lives in [`SONIC/releases/releases.yaml`](SONIC/releases/releases.yaml))
 and links each tag to that release's notes, so no version string or release list
@@ -207,6 +204,19 @@ https://<pages-host>/                 # redirect to the default branch's version
 https://<pages-host>/versions.json    # the list the switcher reads
 https://<pages-host>/<version>/       # docs from the default branch or an rls-* tag
 ```
+
+To reproduce this exact multi-version assembly locally, run
+[`_scripts/build-site.sh`](_scripts/build-site.sh) (it builds the default branch
+and every `rls-*` tag into `<version>/` folders via throwaway `git worktree`s,
+then generates `versions.json` and the root redirect):
+
+```sh
+marvell-docs/_scripts/build-site.sh --serve        # build all versions and serve
+marvell-docs/_scripts/build-site.sh --venv --serve # also set up a venv from requirements.txt
+```
+
+It builds committed refs (commit/tag to preview a release); to preview
+uncommitted edits on the current branch, use `make -C marvell-docs html`.
 
 The exact `<pages-host>` is resolved by `actions/configure-pages`, so it works on
 github.com, GitHub Enterprise, and custom-domain/private `*.pages.github.io`
