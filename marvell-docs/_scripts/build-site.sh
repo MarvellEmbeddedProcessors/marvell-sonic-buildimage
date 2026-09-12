@@ -4,12 +4,9 @@
 # GitHub Actions workflow (.github/workflows/docs.yml) assembles it for GitHub
 # Pages. It builds:
 #
-#   * the default branch, marked "(latest)" and used for the root redirect, and
-#   * every "rls-*" tag,
-#
-# each into <site>/<version>/ (version = the ref name with the "rls-" prefix
-# stripped, else "master" -- matching conf.py), then generates versions.json for
-# the switcher and a root index.html that redirects to the default version.
+# every git "rls-*" tag that also has a releases.yaml entry (see releases_lib.py),
+# each into <site>/<version>/ (version = tag name with the "rls-" prefix stripped).
+# Then generates versions.json (latest: true first) and a root redirect to latest.
 #
 # Differences from CI (by design):
 #   * Refs are checked out into throwaway `git worktree`s, so your current
@@ -28,8 +25,6 @@
 #                        (default: http://localhost:PORT)
 #   --serve              Serve the assembled site over HTTP after building
 #   --port PORT          Port for --base/--serve (default: 8000)
-#   --default-branch REF Ref treated as the default/"latest" version
-#                        (default: the currently checked-out branch)
 #   --venv               Create/reuse marvell-docs/_build/.venv and install
 #                        requirements.txt into it (otherwise deps must be on PATH)
 #   -h, --help           Show this help
@@ -45,7 +40,6 @@ PORT=8000
 BASE=""
 SERVE=0
 USE_VENV=0
-DEFAULT_BRANCH="$(git -C "$REPO_ROOT" rev-parse --abbrev-ref HEAD)"
 
 # Print the header comment block (lines after the shebang, up to the first
 # non-comment line), stripping the leading "# ". Robust to line-number changes.
@@ -57,7 +51,6 @@ while [ $# -gt 0 ]; do
     --base)           BASE="$2"; shift 2 ;;
     --serve)          SERVE=1; shift ;;
     --port)           PORT="$2"; shift 2 ;;
-    --default-branch) DEFAULT_BRANCH="$2"; shift 2 ;;
     --venv)           USE_VENV=1; shift ;;
     -h|--help)        usage; exit 0 ;;
     *) echo "error: unknown argument '$1'" >&2; usage >&2; exit 2 ;;
@@ -66,11 +59,6 @@ done
 
 : "${BASE:=http://localhost:$PORT}"
 BASE="${BASE%/}"
-
-if [ "$DEFAULT_BRANCH" = "HEAD" ]; then
-  echo "error: detached HEAD; pass --default-branch <ref>" >&2
-  exit 2
-fi
 
 # version string for a ref name (mirrors conf.py: strip "rls-", else "master").
 ref_version() {
@@ -146,31 +134,32 @@ build_ref() {
   echo "    done: /$v/"
 }
 
-# Default branch first (the "latest" version), then every rls-* tag.
-build_ref "$DEFAULT_BRANCH" "$DEFAULT_BRANCH"
-while read -r tag; do
-  [ -n "$tag" ] || continue
+mapfile -t PUBLISHED_TAGS < <(python3 "$DOCS_DIR/_scripts/releases_lib.py" --list-tags)
+if [ "${#PUBLISHED_TAGS[@]}" -eq 0 ]; then
+  echo "error: no published releases (git rls-* tag with a releases.yaml entry)" >&2
+  exit 1
+fi
+
+for tag in "${PUBLISHED_TAGS[@]}"; do
   build_ref "$tag" "$tag"
-done < <(git -C "$REPO_ROOT" tag -l 'rls-*')
+done
 
 if [ -z "$(ls -A "$SITE")" ]; then
   echo "error: no versions were built" >&2
   exit 1
 fi
 
-default_version="$(ref_version "$DEFAULT_BRANCH")"
+default_version="$(python3 "$DOCS_DIR/_scripts/releases_lib.py" --latest-version)" || {
+  echo "error: no release marked latest: true in releases.yaml" >&2
+  exit 1
+}
 
-# The root redirect points at the default version, so that build must exist.
-# (build_ref skips missing/marvell-docs-less refs; catch that here for the
-# default ref instead of emitting a site that redirects to a 404.)
 if [ ! -d "$SITE/$default_version" ]; then
-  echo "error: default ref '$DEFAULT_BRANCH' (version '$default_version') was not built;" >&2
-  echo "       cannot assemble a site whose root redirect would 404." >&2
+  echo "error: latest version '$default_version' was not built; redirect would 404" >&2
   exit 1
 fi
 
-# Switcher list + root redirect (same tooling the workflow uses).
-python3 "$DOCS_DIR/_scripts/gen_versions_json.py" "$SITE" "$default_version" "$BASE"
+python3 "$DOCS_DIR/_scripts/gen_versions_json.py" "$SITE" "$BASE"
 
 cat > "$SITE/index.html" <<HTML
 <!DOCTYPE html>

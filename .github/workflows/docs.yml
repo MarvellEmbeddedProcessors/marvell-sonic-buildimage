@@ -129,13 +129,6 @@ jobs:
           # loop, which may leave us checked out on an older ref.
           orig_sha="$(git rev-parse HEAD)"
 
-          # Docs version of the default branch (same rule as conf.py: strip the
-          # "rls-" prefix, else "master"). Marked "(latest)" and the redirect target.
-          case "${DEFAULT_BRANCH}" in
-            rls-*) default_version="${DEFAULT_BRANCH#rls-}" ;;
-            *)     default_version="master" ;;
-          esac
-
           # Build one ref into $SITE/<version>/. $1 = git ref to checkout,
           # $2 = human ref name passed to conf.py via GITHUB_REF_NAME.
           build_one() {
@@ -163,12 +156,14 @@ jobs:
             echo "::endgroup::"
           }
 
-          # Default branch first (latest), then every rls-* tag.
-          build_one "origin/${DEFAULT_BRANCH}" "${DEFAULT_BRANCH}"
-          while read -r tag; do
-            [ -n "$tag" ] || continue
+          mapfile -t PUBLISHED_TAGS < <(python3 marvell-docs/_scripts/releases_lib.py --list-tags)
+          if [ "${#PUBLISHED_TAGS[@]}" -eq 0 ]; then
+            echo "::error::No published releases (git rls-* tag with releases.yaml entry)" >&2
+            exit 1
+          fi
+          for tag in "${PUBLISHED_TAGS[@]}"; do
             build_one "$tag" "$tag"
-          done < <(git tag -l 'rls-*')
+          done
 
           # Back to the triggering commit so the current tooling is used below.
           git checkout -f "$orig_sha"
@@ -178,10 +173,12 @@ jobs:
             exit 1
           fi
 
-          # Regenerate the switcher list from the folders just built, so the
-          # dropdown always reflects what's deployed with no file to maintain.
-          python3 marvell-docs/_scripts/gen_versions_json.py \
-            "$SITE" "$default_version" "$BASE"
+          default_version="$(python3 marvell-docs/_scripts/releases_lib.py --latest-version)" || {
+            echo "::error::No release marked latest: true in releases.yaml" >&2
+            exit 1
+          }
+
+          python3 marvell-docs/_scripts/gen_versions_json.py "$SITE" "$BASE"
 
           # Site-root redirect to the default branch's version. The heredoc body
           # and closing delimiter sit at the YAML block-scalar indent (10 spaces);

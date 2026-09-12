@@ -18,7 +18,7 @@ than upstream *sonic-net* repositories. The top-level build repository is
 [marvell-sonic-buildimage](https://github.com/MarvellEmbeddedProcessors/marvell-sonic-buildimage).
 
 Raise pull requests against the **release branch** that matches the Prestera
-SONiC release you are targeting. See [Details](../releases/details.md) for the
+SONiC release you are targeting. See [Releases](../releases/index.md) for the
 current release branches. For example, changes for release tag
 `rls-01.202511.01` are submitted to the `rls-202511.01` branch on
 [marvell-sonic-buildimage](https://github.com/MarvellEmbeddedProcessors/marvell-sonic-buildimage/tree/rls-202511.01).

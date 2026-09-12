@@ -136,7 +136,7 @@ marvell-docs/
     │           └── index.md
     ├── releases/                  Releases
     │   ├── index.md
-    │   ├── details.md
+    │   ├── releases.yaml
     │   └── release-notes.md
     └── collaborate/               Collaborate
         ├── index.md
@@ -176,39 +176,31 @@ Actions Pages flow** (`actions/upload-pages-artifact` + `actions/deploy-pages`)
 — there is **no `gh-pages` branch** — and only runs when a **release tag** or the
 repo's **default branch** is pushed.
 
-Naming convention (both drive the derived docs `version` in [`conf.py`](conf.py),
-which strips the `rls-` prefix):
+Published releases are git `rls-*` tags (including `_rcN` suffixes) that also
+have a matching entry in [`SONIC/releases/releases.yaml`](SONIC/releases/releases.yaml).
+Exactly one yaml entry should set `latest: true`; that version is labelled
+"(latest)" in the switcher and is the site-root redirect target. See
+[`_scripts/releases_lib.py`](_scripts/releases_lib.py).
 
-| Ref | Example | Docs `version` | Deployed? |
-|-----|---------|----------------|-----------|
-| default branch | `rls-202511.01` | `202511.01` | yes → `/<version>/`, marked "(latest)", root redirect target |
-| other branch | `rls-…` / any | derived / `master` | no — build/validate only |
-| tag | `rls-01.202511.01` | `01.202511.01` | yes → `/<version>/` |
+| Ref | Example | Docs `version` folder | In table/switcher? |
+|-----|---------|----------------------|-------------------|
+| `rls-*` tag in yaml + git | `rls-01.202511.01_rc0` | `01.202511.01_rc0/` | yes |
+| other branch / tag | `docs/…`, unlisted tag | build-only / not deployed | no |
 
-A deployed release is always the **tag** form. The release-notes page title
-shows the derived `{{ release_tag }}` (so each release's notes are headed by its
-own tag). The Releases > Details table is generated from the repo's release tags (see
-[`_scripts/gen_releases_table.py`](_scripts/gen_releases_table.py); per-release
-metadata lives in [`SONIC/releases/releases.yaml`](SONIC/releases/releases.yaml))
-and links each tag to that release's notes, so no version string or release list
-is baked into the source.
+The Releases table and version switcher both use the same published-release list.
+The release-notes page title shows `{{ release_tag }}` for each deployed tag build.
 
-Because the native Pages deploy replaces the whole site with a single artifact,
-the deploy job **rebuilds every version on each run**: it checks out the default
-branch and each `rls-*` tag in turn, builds each with `GITHUB_REF_NAME` set to
-that ref (so `conf.py` renders the right version with no per-ref edits), and
-assembles them into one site tree:
+The deploy job rebuilds **every published release** on each run and assembles:
 
 ```
-https://<pages-host>/                 # redirect to the default branch's version
-https://<pages-host>/versions.json    # the list the switcher reads
-https://<pages-host>/<version>/       # docs from the default branch or an rls-* tag
+https://<pages-host>/                 # redirect to the release marked latest: true
+https://<pages-host>/versions.json    # switcher list (from releases.yaml + git)
+https://<pages-host>/<version>/       # docs built from that release tag
 ```
 
-To reproduce this exact multi-version assembly locally, run
-[`_scripts/build-site.sh`](_scripts/build-site.sh) (it builds the default branch
-and every `rls-*` tag into `<version>/` folders via throwaway `git worktree`s,
-then generates `versions.json` and the root redirect):
+To reproduce locally, run [`_scripts/build-site.sh`](_scripts/build-site.sh)
+(it builds each published `rls-*` tag into `<version>/` via throwaway `git worktree`s,
+then writes `versions.json` and the root redirect):
 
 ```sh
 marvell-docs/_scripts/build-site.sh --serve        # build all versions and serve

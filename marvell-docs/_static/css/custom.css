@@ -40,6 +40,25 @@
   text-align: center;
 }
 
+/* Releases table: keep tag names and lifecycle labels on one line. */
+.bd-article table.releases-table th,
+.bd-article table.releases-table td {
+  vertical-align: middle;
+}
+
+.bd-article table.releases-table th:nth-child(1),
+.bd-article table.releases-table td:nth-child(1),
+.bd-article table.releases-table th:nth-child(2),
+.bd-article table.releases-table td:nth-child(2),
+.bd-article table.releases-table th:nth-child(6),
+.bd-article table.releases-table td:nth-child(6) {
+  white-space: nowrap;
+}
+
+.bd-article table.releases-table td p {
+  margin-bottom: 0;
+}
+
 /* Ensure images using the `:align: center` directive option are actually
    centered on the page (the theme does not style this by default), with a
    two-line-height gap above so they don't crowd the heading right before

@@ -1,16 +1,33 @@
 # Releases
 
-Prestera SONiC release branches, naming convention, and per-release notes.
+Status and highlights for each supported Prestera SONiC release. Each release
+has its own page with detailed notes.
 
-```{toctree}
-:caption: In this section
-:maxdepth: 1
+## Naming Convention
 
-details
+```{image} ../about/images/release-naming-convention.svg
+:alt: Release naming convention
+:align: center
 ```
 
-% The release-notes page describes a single release, so it's listed only on
-% release-tag builds. The included toctree entry is generated in conf.py's
-% setup() (empty on branch/local builds) -- see _release_notes_toctree.md.
+## Prestera SONiC Releases
+
+```{include} _releases_table.md
+```
+
+### Lifecycle
+
+**In Development**
+: Branch is not yet released and is in active development with bug fixes
+  and new feature additions.
+
+**Released Active**
+: Branch is released for customers and also in active development for bug
+  fixes.
+
+**Released Inactive**
+: Branch is released for customers and no active development is happening
+  from Marvell. Bug fixes can be received on these branches.
+
 ```{include} _release_notes_toctree.md
 ```

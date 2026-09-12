@@ -32,4 +32,4 @@ submodules are Marvell-maintained forks that carry Prestera-specific changes.
   pinned to is defined in the *.gitmodules* file at the root of
   *sonic-buildimage*.
 - Submodule-specific changes made for a given Prestera SONiC release are
-  called out in that release's page under [Details](../releases/details.md).
+  called out in that release page itself. Refer to [Releases](../releases/index.md).

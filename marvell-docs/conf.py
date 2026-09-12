@@ -2,7 +2,6 @@
 # See https://www.sphinx-doc.org/en/master/usage/configuration.html
 
 import os
-import re
 import sys
 from datetime import datetime
 
@@ -31,19 +30,22 @@ project = "Prestera SONiC"
 author = "Marvell"
 copyright = f"2024-{datetime.now().year}, Marvell"
 
-# Documentation version: the deploy subfolder and the entry selected in the
-# release drop-down (version switcher). Derived from the ref being built by
-# stripping the "rls-" prefix from its name; refs not named "rls-*" (feature
-# branches, a non-"rls-" default branch, local builds) are "master". The naming
-# intentionally differs between branches and tags:
-#   * branch "rls-202511.01"     -> version "202511.01"
-#   * tag    "rls-01.202511.01"  -> version "01.202511.01"
-# The default branch and release tags are the refs that get published (see
-# .github/workflows/docs.yml). This becomes an entry in the version switcher's
-# list, which the workflow regenerates on every deploy from the folders present
-# on gh-pages -- so there is no hand-maintained version file to keep in sync.
+# Documentation version: deploy subfolder for this build (strip "rls-" from the
+# ref name; non-"rls-*" refs map to "master"). The version switcher list itself
+# comes from releases.yaml + git tags (see releases_lib.py), not from branch
+# names.
 _ref_name = os.environ.get("GITHUB_REF_NAME", "")
 version = _ref_name[len("rls-"):] if _ref_name.startswith("rls-") else "master"
+
+from releases_lib import (  # noqa: E402
+    load_releases,
+    published_tags,
+    switcher_version_match,
+)
+
+_releases_meta = load_releases()
+_published_tags = published_tags(_releases_meta)
+_switcher_match = switcher_version_match(version, _releases_meta, _published_tags)
 
 # Release tag shown on the release-notes page and naming diagram. Derived (not
 # hard-coded) from the ref, so the same source renders whatever the current ref
@@ -54,13 +56,9 @@ version = _ref_name[len("rls-"):] if _ref_name.startswith("rls-") else "master"
 release = version
 release_tag = f"rls-{version}"
 
-# Is this build from a *release tag* (vs a branch / local build)? A release tag
-# yields a 3-part version ("01.202511.01"); a branch yields 2 parts
-# ("202511.01") and everything else is "master". Only release tags get a
-# release-notes entry (branches are in-development, not a release): the
-# release-notes toctree entry is generated in setup() only when this is true, so
-# it's absent from the section nav on branch/local builds.
-is_release = bool(re.fullmatch(r"\d+\.\d+\.\d+", version))
+# Release-notes are built only for rls-* tags listed in releases.yaml with a
+# matching git tag (see published_tags()).
+is_release = _ref_name in _published_tags
 
 html_title = ""
 html_logo = "_static/images/marvell_sonic_logo.png"
@@ -104,8 +102,8 @@ exclude_patterns = [
     "README.md",
     ".venv",
     "venv",
-    # Generated at build time and pulled into details.md via {include}; not a
-    # standalone document (see setup() below and _scripts/gen_releases_table.py).
+    # Generated at build time and pulled into releases/index.md via {include};
+    # not a standalone document (see setup() and gen_releases_table.py).
     "SONIC/releases/_releases_table.md",
     # Likewise generated in setup(): the (conditional) release-notes toctree
     # entry, pulled into SONIC/releases/index.md via {include}.
@@ -147,7 +145,7 @@ html_theme_options = {
         "json_url": os.environ.get(
             "DOCS_SWITCHER_JSON_URL", f"{_pages_base}/versions.json"
         ),
-        "version_match": version,
+        "version_match": _switcher_match,
     },
     # Never fetch/validate json_url at build time: the switcher list only needs
     # to resolve at runtime in the browser (after deploy). The build-time check
@@ -175,15 +173,19 @@ def setup(app):
 
     These are git-ignored and rebuilt here before the docs are read:
 
-    * The Releases > Details table is generated from the repo's release tags
-      (see _scripts/gen_releases_table.py) and pulled into details.md via
-      {include}, so it lists every release without a hand-maintained table.
+    * The Releases table is generated from git rls-* tags that also appear in
+      releases.yaml (see releases_lib.py / gen_releases_table.py) and pulled
+      into SONIC/releases/index.md via {include}.
 
     (The release-naming diagram is now a committed static SVG -- its convention
     is fixed -- so it is no longer generated here. Regenerate it manually with
     _scripts/gen_release_naming_svg.py only if the convention changes.)
     """
     from gen_releases_table import render as render_releases_table
+    from releases_lib import latest_tag
+
+    if _published_tags:
+        latest_tag(_releases_meta, _published_tags)
 
     render_releases_table(
         os.path.join(_CONFDIR, "SONIC", "releases", "_releases_table.md")
