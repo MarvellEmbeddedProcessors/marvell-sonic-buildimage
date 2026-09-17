@@ -21,6 +21,12 @@
 releases:
   rls-01.202511.01_rc0:
     release: "R1"
+    marvell_sai: "7.0.1"
+    ocp_sai: "SAI-1.17.1"
+    ocp_sai_url: "https://github.com/opencomputeproject/SAI/releases/tag/v1.17.1"
+    lifecycle: "In Development"
+  rls-01.202511.01_rc1:
+    release: "R1"
     latest: true
     marvell_sai: "7.0.1"
     ocp_sai: "SAI-1.17.1"
