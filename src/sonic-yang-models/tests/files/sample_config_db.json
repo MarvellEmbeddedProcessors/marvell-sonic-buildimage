@@ -189,6 +189,46 @@
                 "family": "IPv6"
             }
         },
+	"VRRP": {
+	    "Vlan111|1": {
+		"vrid": "10",
+		"version": "3",
+		"pre_empt": "True",
+		"use_v2_checksum": "False",
+		"priority": "110",
+		"adv_interval": "1",
+		"vip": [
+		    "192.168.0.10",
+		    "192.168.0.11"
+		]
+	    }
+	},
+
+	"VRRP_TRACK": {
+	    "Vlan111|1|Ethernet4": {
+		"priority_increment": "20"
+	    }
+	},
+
+	"VRRP6": {
+	    "Vlan777|1": {
+		"vrid": "42",
+		"pre_empt": "True",
+		"use_v2_checksum": "False",
+		"priority": "120",
+		"adv_interval": "1",
+		"vip": [
+		    "2001:db8::10",
+		    "2001:db8::20"
+		]
+	    }
+	},
+
+	"VRRP6_TRACK": {
+	    "Vlan777|1|Ethernet8": {
+		"priority_increment": "10"
+	    }
+	},
         "ACL_RULE": {
             "V4-ACL-TABLE|DEFAULT_DENY": {
                 "PACKET_ACTION": "DROP",

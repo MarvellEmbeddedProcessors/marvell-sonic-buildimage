@@ -86,6 +86,19 @@
 		    "trap_priority": "1"
 
 	    }
+{% if DEVICE_METADATA is defined and DEVICE_METADATA['localhost'] is defined and DEVICE_METADATA['localhost']['frr_mgmt_framework_config'] is defined and DEVICE_METADATA['localhost']['frr_mgmt_framework_config'] == "true" %}
+	    ,
+	    "queue2_group2": {
+		    "cir":"400",
+		    "cbs":"400",
+		    "meter_type":"packets",
+		    "mode":"sr_tcm",
+		    "red_action":"drop",
+		    "trap_action":"trap",
+		    "trap_priority":"7",
+		    "queue": "2"
+	    }
+{% endif %}
     },
     "COPP_TRAP": {
 	    "bgp": {
@@ -137,5 +150,13 @@
 		    "trap_group": "queue1_group3",
 		    "always_enabled": "true"
 	    }
+{% if DEVICE_METADATA is defined and DEVICE_METADATA['localhost'] is defined and DEVICE_METADATA['localhost']['frr_mgmt_framework_config'] is defined and DEVICE_METADATA['localhost']['frr_mgmt_framework_config'] == "true" %}
+	    ,
+	    "vrrp": {
+		    "trap_ids": "vrrp,vrrpv6",
+		    "trap_group": "queue2_group2",
+		    "always_enabled": "true"
+	    }
+{% endif %}
     }
 }

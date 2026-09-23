@@ -1,5 +1,6 @@
 import sys
 import os
+import site
 import pytest
 import sonic_yang as sy
 import json
@@ -402,6 +403,11 @@ class Test_SonicYang(object):
     def sonic_yang_data(self):
         sonic_yang_dir = "/usr/local/yang-models/"
         sonic_yang_test_file = "../sonic-yang-models/tests/files/sample_config_db.json"
+        for site_dir in site.getsitepackages() + [site.getusersitepackages()]:
+            installed_sample = os.path.join(site_dir, 'tests', 'files', 'sample_config_db.json')
+            if os.path.isfile(installed_sample):
+                sonic_yang_test_file = installed_sample
+                break
 
         syc = sy.SonicYang(sonic_yang_dir)
         syc.loadYangModel()
