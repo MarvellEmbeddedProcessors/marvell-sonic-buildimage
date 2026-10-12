@@ -19,7 +19,7 @@
 #   lifecycle:      In Development / Released Active / Released Inactive.
 #   release_branch: Optional; overrides the derived rls-<sonic>.<minor> branch.
 releases:
-  rls-01.202511.01_rc1:
+  rls-01.202511.01_rc2:
     release: "R1"
     latest: true
     marvell_sai: "7.0.1"
