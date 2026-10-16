@@ -8,7 +8,8 @@
 	branch = 202511
 [submodule "sonic-sairedis"]
 	path = src/sonic-sairedis
-	url = git@github.com:Marvell-Lab/sonic-sairedis.git
+	url = https://github.com/MarvellEmbeddedProcessors/marvell-sonic-sairedis
+	branch = rls-202511.01
 [submodule "sonic-swss"]
 	path = src/sonic-swss
 	url = https://github.com/MarvellEmbeddedProcessors/marvell-sonic-swss.git
