@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<data xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" version="2025-07-21-1.12" profile="Askl1" dsig="md5" sid="326b85c3-18dd-4d43-b6de-9895ac316731">
+<data xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" version="2026-05-14-1.15" profile="Askl1" dsig="md5" sid="abd9b573-b794-499b-907f-9130515dbe12">
   <ASKL1plt:ASK-L1 xmlns:ASKL1plt="urn:marvell:ASKL1:yang">
     <ASKL1plt:typedefs>
       <ASKL1plt:typedef>
@@ -598,6 +598,11 @@
           <ASKL1plt:description>COMPHY_C28G</ASKL1plt:description>
           <ASKL1plt:value>2</ASKL1plt:value>
         </ASKL1plt:enum>
+        <ASKL1plt:enum>
+          <ASKL1plt:name>COMPHY_C12G</ASKL1plt:name>
+          <ASKL1plt:description>COMPHY_C12G</ASKL1plt:description>
+          <ASKL1plt:value>3</ASKL1plt:value>
+        </ASKL1plt:enum>
       </ASKL1plt:typedef>
       <ASKL1plt:typedef>
         <ASKL1plt:name>port-interconnect-profile-type</ASKL1plt:name>
@@ -733,12 +738,6 @@
           <ASKL1plt:fec ASKL1plt:type="fec-type">disabled</ASKL1plt:fec>
         </ASKL1plt:IfModeSpeedList-list>
         <ASKL1plt:APIfModeSpeedList-list>
-          <ASKL1plt:APifMode ASKL1plt:type="interface-mode-type">CR</ASKL1plt:APifMode>
-          <ASKL1plt:APspeed ASKL1plt:type="port-speed-type">25G</ASKL1plt:APspeed>
-          <ASKL1plt:APfecSupport ASKL1plt:type="fec-type">rs_enabled</ASKL1plt:APfecSupport>
-          <ASKL1plt:APfecRequest ASKL1plt:type="fec-type">rs_enabled</ASKL1plt:APfecRequest>
-        </ASKL1plt:APIfModeSpeedList-list>
-        <ASKL1plt:APIfModeSpeedList-list>
           <ASKL1plt:APifMode ASKL1plt:type="interface-mode-type">KR</ASKL1plt:APifMode>
           <ASKL1plt:APspeed ASKL1plt:type="port-speed-type">25G</ASKL1plt:APspeed>
           <ASKL1plt:APfecSupport ASKL1plt:type="fec-type">rs_enabled</ASKL1plt:APfecSupport>
@@ -757,16 +756,10 @@
           <ASKL1plt:APfecRequest ASKL1plt:type="fec-type">disabled</ASKL1plt:APfecRequest>
         </ASKL1plt:APIfModeSpeedList-list>
         <ASKL1plt:APIfModeSpeedList-list>
-          <ASKL1plt:APifMode ASKL1plt:type="interface-mode-type">2500BASE_X</ASKL1plt:APifMode>
-          <ASKL1plt:APspeed ASKL1plt:type="port-speed-type">2500M</ASKL1plt:APspeed>
-          <ASKL1plt:APfecSupport ASKL1plt:type="fec-type">disabled</ASKL1plt:APfecSupport>
-          <ASKL1plt:APfecRequest ASKL1plt:type="fec-type">disabled</ASKL1plt:APfecRequest>
-        </ASKL1plt:APIfModeSpeedList-list>
-        <ASKL1plt:APIfModeSpeedList-list>
-          <ASKL1plt:APifMode ASKL1plt:type="interface-mode-type">KR</ASKL1plt:APifMode>
-          <ASKL1plt:APspeed ASKL1plt:type="port-speed-type">5G</ASKL1plt:APspeed>
-          <ASKL1plt:APfecSupport ASKL1plt:type="fec-type">disabled</ASKL1plt:APfecSupport>
-          <ASKL1plt:APfecRequest ASKL1plt:type="fec-type">disabled</ASKL1plt:APfecRequest>
+          <ASKL1plt:APifMode ASKL1plt:type="interface-mode-type">CR</ASKL1plt:APifMode>
+          <ASKL1plt:APspeed ASKL1plt:type="port-speed-type">25G</ASKL1plt:APspeed>
+          <ASKL1plt:APfecSupport ASKL1plt:type="fec-type">rs_enabled</ASKL1plt:APfecSupport>
+          <ASKL1plt:APfecRequest ASKL1plt:type="fec-type">rs_enabled</ASKL1plt:APfecRequest>
         </ASKL1plt:APIfModeSpeedList-list>
       </ASKL1plt:ifModeNameList>
     </ASKL1plt:IfModeName>

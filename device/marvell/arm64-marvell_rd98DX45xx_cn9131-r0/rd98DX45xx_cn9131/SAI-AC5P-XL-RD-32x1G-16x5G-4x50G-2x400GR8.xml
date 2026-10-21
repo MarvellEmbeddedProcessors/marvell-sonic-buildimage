@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<data xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" version="2025-08-25-1.12" profile="SAI" dsig="md5" sid="83e62682-dcf7-4eee-9ae7-6144f7394d66">
+<data xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" version="2026-06-15-1.15" profile="SAI" dsig="md5" sid="51df116b-fced-42b6-ab31-d88cde9cd7cc">
   <SAIplt:SAI xmlns:SAIplt="urn:marvell:SAI:yang">
     <SAIplt:typedefs>
       <SAIplt:typedef>
@@ -62,7 +62,7 @@
         </SAIplt:enum>
         <SAIplt:enum>
           <SAIplt:name>SEPERATE_COUNTER</SAIplt:name>
-          <SAIplt:description>Seperate Counter for Packets and Bytes {Consumes additional hardware resources}</SAIplt:description>
+          <SAIplt:description>Separate  Counter for Packets and Bytes {Consumes additional hardware resources}</SAIplt:description>
           <SAIplt:value>1</SAIplt:value>
         </SAIplt:enum>
       </SAIplt:typedef>
@@ -494,6 +494,7 @@ to the MacAddress textual convention of the SMIv2.</SAIplt:description>
       <SAIplt:max_ipv4_tunnel SAIplt:type="uint32">8</SAIplt:max_ipv4_tunnel>
       <SAIplt:max_ipv6_tunnel SAIplt:type="uint32">8</SAIplt:max_ipv6_tunnel>
       <SAIplt:max_tti SAIplt:type="uint32">1024</SAIplt:max_tti>
+      <SAIplt:max_nat SAIplt:type="uint32">0</SAIplt:max_nat>
     </SAIplt:scalingAC5P_XL>
     <SAIplt:Counters>
       <SAIplt:cnc-base-list-AC5P-XL>
@@ -502,6 +503,8 @@ to the MacAddress textual convention of the SMIv2.</SAIplt:description>
       <SAIplt:router-in-drop-counter SAIplt:type="InDropCounter-type">ROUTE_BLACKHOLE</SAIplt:router-in-drop-counter>
       <SAIplt:Vlan-counter>
         <SAIplt:coalesced-counters SAIplt:type="CounterFormat-type">COALESCED_COUNTER</SAIplt:coalesced-counters>
+        <SAIplt:vlan-drop-error-stats SAIplt:type="Feature-enable">Disabled</SAIplt:vlan-drop-error-stats>
+        <SAIplt:override-counters SAIplt:type="Feature-enable">Enabled</SAIplt:override-counters>
       </SAIplt:Vlan-counter>
       <SAIplt:Queue-counter>
         <SAIplt:queue-pass-drop-counter SAIplt:type="Feature-enable">Disabled</SAIplt:queue-pass-drop-counter>
@@ -514,6 +517,8 @@ to the MacAddress textual convention of the SMIv2.</SAIplt:description>
     <SAIplt:Feature>
       <SAIplt:PHY_Temperature SAIplt:type="Feature-enable">Disabled</SAIplt:PHY_Temperature>
       <SAIplt:MAC-in-MAC-Tunnel-Enable SAIplt:type="Feature-enable">Disabled</SAIplt:MAC-in-MAC-Tunnel-Enable>
+      <SAIplt:Lossless-Traffic-Warmboot SAIplt:type="Feature-enable">Disabled</SAIplt:Lossless-Traffic-Warmboot>
+      <SAIplt:QinQ_Enable SAIplt:type="Feature-enable">Disabled</SAIplt:QinQ_Enable>
     </SAIplt:Feature>
     <SAIplt:Features-using-acl>
       <SAIplt:feature SAIplt:type="acl-feature-name-type">control-acl</SAIplt:feature>
