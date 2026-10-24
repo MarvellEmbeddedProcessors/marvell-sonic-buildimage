@@ -165,6 +165,9 @@ INCLUDE_P4RT = n
 # INCLUDE_VS_DASH_SAI - build dash-sai for VS
 INCLUDE_VS_DASH_SAI ?= y
 
+# BUILD_MRVL_PRESTERA_PSAI_VS - build the marvell-prestera-psai-vs virtual flavor
+BUILD_MRVL_PRESTERA_PSAI_VS ?= n
+
 # ENABLE_AUTO_TECH_SUPPORT - Enable the configuration for event-driven techsupport & coredump mgmt feature
 ENABLE_AUTO_TECH_SUPPORT = y
 

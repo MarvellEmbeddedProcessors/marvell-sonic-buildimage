@@ -400,6 +400,13 @@ sudo chmod 755 $FILESYSTEM_ROOT/usr/bin/control_plane_drop_check
 sudo cp $IMAGE_CONFIGS/monit/mgmt_oper_status.py $FILESYSTEM_ROOT/usr/bin/
 sudo chmod 755 $FILESYSTEM_ROOT/usr/bin/mgmt_oper_status.py
 
+# Install marvell-prestera-psai-vs host-side helpers.
+if [ "$TARGET_MACHINE" = "marvell-prestera-psai-vs" ]; then
+    sudo install -m 0755 $IMAGE_CONFIGS/marvell-prestera/pvmshell $FILESYSTEM_ROOT/usr/bin/pvmshell
+    sudo install -d -m 0755 $FILESYSTEM_ROOT/etc/sonic
+    sudo install -m 0644 $IMAGE_CONFIGS/marvell-prestera/vs_chassis_metadata.json $FILESYSTEM_ROOT/etc/sonic/vs_chassis_metadata.json
+fi
+
 # Installed smartmontools version should match installed smartmontools in docker-platform-monitor Dockerfile
 sudo LANG=C DEBIAN_FRONTEND=noninteractive chroot $FILESYSTEM_ROOT apt-get -y install smartmontools
 sudo cp $IMAGE_CONFIGS/smartmontools/smartmontools $FILESYSTEM_ROOT/etc/default/smartmontools

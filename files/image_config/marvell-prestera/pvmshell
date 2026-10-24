@@ -1,0 +1,5 @@
+#!/bin/bash
+# Host-side wrapper that opens the Marvell Prestera remote shell
+# inside the syncd container. Installed at /usr/bin/pvmshell on the
+# marvell-prestera-psai-vs image (see files/build_templates/sonic_debian_extension.j2).
+docker exec -it syncd /bin/bash
