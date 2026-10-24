@@ -160,3 +160,9 @@
 	path = platform/broadcom/saibcm-modules
 	url = https://github.com/sonic-net/saibcm-modules.git
 	branch = sdk-6.5.35-xgs
+[submodule "platform/marvell-prestera/prestera-psai"]
+	path = platform/marvell-prestera/prestera-psai
+	url = git@github.com:Marvell-Lab/prestera-psai.git
+	branch = SAI_DEV_26_08_31
+	update = none
+	ignore = all
