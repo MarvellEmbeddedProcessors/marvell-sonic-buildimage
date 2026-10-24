@@ -1000,8 +1000,8 @@ $(SONIC_INSTALL_DEBS) : $(DEBS_PATH)/%-install : .platform $$(addsuffix -install
 	[ -f $(DEBS_PATH)/$* ] || { echo $(DEBS_PATH)/$* does not exist $(LOG) && false $(LOG) }
 	# wait for conflicted packages to be uninstalled
 	$(foreach deb, $($*_CONFLICT_DEBS), \
-		{ while dpkg -s $(firstword $(subst _, ,$(basename $(deb)))) | grep "^Version: $(word 2, $(subst _, ,$(basename $(deb))))" &> /dev/null; do echo "waiting for $(deb) to be uninstalled" $(LOG); sleep 1; done } )
-	# Use flock for serialized dpkg install — eliminates polling overhead from the
+		{ while dpkg -s $(firstword $(subst _, ,$(basename $(deb)))) | grep "^Version: $(word 2, $(subst _, ,$(basename $(deb))))" &> /dev/null; do echo "waiting for $(deb) to be uninstalled" $(LOG); sleep 1; done ; } ; )
+	# Use flock for serialized dpkg install - eliminates polling overhead from the
 	# previous mkdir/sleep-10 lock. Waiters block in the kernel until the lock is
 	# released, so there is zero wasted time between consecutive installs.
 ifneq ($(CROSS_BUILD_ENVIRON),y)
