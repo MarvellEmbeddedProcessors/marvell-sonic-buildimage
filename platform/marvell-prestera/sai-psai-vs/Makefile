@@ -26,19 +26,18 @@ $(DEST)/%.deb:
 		MAKEFLAGS= $(MAKE) -j1 PYTHONINC=$$PYINC PYTHONFLAG=-lpython$$PYVER sai
 	cd $(PSAI)/build && ./build_sai_debian_pkg.sh $(patsubst mrvlvslibsai_%_amd64.deb,%,$(notdir $@)) amd64
 	cp $(PSAI)/dist/mrvlvslibsai_[0-9]*_amd64.deb $(DEST)/$(notdir $@)
-	# build_sai_debian_pkg.sh always hardcodes "Package: mrvllibsai" in
-	# DEBIAN/control regardless of the output filename it's asked for, so the
-	# deb we just copied (correctly named mrvlvslibsai_*.deb on disk) actually
-	# registers itself in dpkg's database as "mrvllibsai" -- the SAME package
-	# name as the real-hardware SAI from sai.mk. That defeats our
-	# add_conflict_package(MARVELL_PRESTERA_PSAI_VS_LIBSAI, LIBSAIVS_DEV) wait
-	# in slave.mk (which matches on this Package: field, not the filename) and
-	# makes dpkg itself flag a bogus file-collision with libsaivs-dev instead
-	# of the intended one. Rewrite the field in-place so the installed
-	# package's identity matches its filename.
 	rm -rf $(DEST)/.mrvlvslibsai-repack
 	dpkg-deb -R $(DEST)/$(notdir $@) $(DEST)/.mrvlvslibsai-repack
 	sed -i 's/^Package:.*/Package: mrvlvslibsai/' $(DEST)/.mrvlvslibsai-repack/DEBIAN/control
+	printf '%s\n' '#!/bin/sh' 'set -e' \
+		'case "$$1" in install|upgrade)' \
+		'  dpkg-divert --package mrvlvslibsai --quiet --rename --add /usr/lib/x86_64-linux-gnu/libsaivs.so.0.0.0 || true ;;' \
+		'esac' 'exit 0' > $(DEST)/.mrvlvslibsai-repack/DEBIAN/preinst
+	printf '%s\n' '#!/bin/sh' 'set -e' \
+		'case "$$1" in remove|purge)' \
+		'  dpkg-divert --package mrvlvslibsai --quiet --rename --remove /usr/lib/x86_64-linux-gnu/libsaivs.so.0.0.0 || true ;;' \
+		'esac' 'exit 0' > $(DEST)/.mrvlvslibsai-repack/DEBIAN/postrm
+	chmod 0755 $(DEST)/.mrvlvslibsai-repack/DEBIAN/preinst $(DEST)/.mrvlvslibsai-repack/DEBIAN/postrm
 	dpkg-deb -b $(DEST)/.mrvlvslibsai-repack $(DEST)/$(notdir $@)
 	rm -rf $(DEST)/.mrvlvslibsai-repack
 
