@@ -117,6 +117,12 @@ generate_device_list()
     if [ "$TARGET_MACHINE" = "alpinevs" ] ; then
       echo "x86_64-kvm_x86_64-r0" >> "$platforms_asic";
     fi
+    #
+    # Virtual / KVM secondary flavors: add the kvm platform identifier so the
+    # installer can land on x86_64-kvm_x86_64-r0
+    if [ "$TARGET_MACHINE" = "marvell-prestera-psai-vs" ] ; then
+        echo "x86_64-kvm_x86_64-r0" >> "$platforms_asic";
+    fi
 }
 
 if [ "$IMAGE_TYPE" = "onie" ]; then

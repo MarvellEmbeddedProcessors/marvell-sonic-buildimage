@@ -1,0 +1,13 @@
+#DPKG FRK
+DOCKER_SYNCD_MARVELL_PRESTERA_PSAI_VS = docker-syncd-marvell-prestera-psai-vs.gz
+DOCKER_SYNCD_MARVELL_PRESTERA_PSAI_VS_DBG = docker-syncd-marvell-prestera-psai-vs-$(DBG_IMAGE_MARK).gz
+DPATH       := $($(DOCKER_SYNCD_MARVELL_PRESTERA_PSAI_VS)_PATH)
+DEP_FILES   := $(SONIC_COMMON_FILES_LIST) platform/marvell-prestera/docker-syncd-marvell-prestera-psai-vs.mk platform/marvell-prestera/docker-syncd-marvell-prestera-psai-vs.dep platform/marvell-prestera/sai-psai-vs.mk platform/marvell-prestera/sai-psai-vs/Makefile
+DEP_FILES   += $(SONIC_COMMON_BASE_FILES_LIST)
+DEP_FILES   += $(shell git ls-files $(DPATH))
+
+$(DOCKER_SYNCD_MARVELL_PRESTERA_PSAI_VS)_CACHE_MODE  := GIT_CONTENT_SHA
+$(DOCKER_SYNCD_MARVELL_PRESTERA_PSAI_VS)_DEP_FLAGS   := $(SONIC_COMMON_FLAGS_LIST)
+$(DOCKER_SYNCD_MARVELL_PRESTERA_PSAI_VS)_DEP_FILES   := $(DEP_FILES)
+
+$(eval $(call add_dbg_docker,$(DOCKER_SYNCD_MARVELL_PRESTERA_PSAI_VS),$(DOCKER_SYNCD_MARVELL_PRESTERA_PSAI_VS_DBG)))

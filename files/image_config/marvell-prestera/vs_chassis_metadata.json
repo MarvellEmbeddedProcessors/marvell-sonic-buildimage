@@ -1,0 +1,7 @@
+{
+  "_comment": "Stub metadata for the marvell-prestera-psai-vs single-asic KVM image. Consumed by sonic_platform.chassis.Chassis (from sonic-platform-modules-vs) at module import. Single-asic VS images do not call get_supervisor_slot()/get_linecard_slot()/get_my_slot(), but is_supervisor/is_linecard are kept here so any future caller observes a sane 'standalone, not a chassis' configuration instead of a KeyError.",
+  "is_supervisor": false,
+  "is_linecard": false,
+  "sup_slot_num": 0,
+  "lc_slot_num": 0
+}
