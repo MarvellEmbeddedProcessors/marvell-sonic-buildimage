@@ -13,8 +13,23 @@ $(addprefix $(DEST)/, $(MAIN_TARGET)): $(DEST)/% :
 	# set asic type for virtual switch
 	if [ "$(CONFIGURED_PLATFORM)" = "vpp" ]; then \
 		echo "vpp" > ../../../device/virtual/x86_64-kvm_x86_64-r0/platform_asic; \
+	elif [ "$(BUILD_MRVL_PRESTERA_PSAI_VS)" = "y" ]; then \
+		printf "vs\nmarvell-prestera-psai-vs\n" > ../../../device/virtual/x86_64-kvm_x86_64-r0/platform_asic; \
 	else \
 		echo "vs" > ../../../device/virtual/x86_64-kvm_x86_64-r0/platform_asic; \
+	fi;
+
+	# select default HWSKU: use the requested Marvell Prestera VS HWSKU
+	# (paired with the white-model SAI, see PSAI_VS_HWSKU in rules/config)
+	# when building the marvell-prestera-psai-vs flavor, otherwise keep the
+	# standard Force10-S6000 default used by vs/alpinevs/vpp. This
+	# build-time selection is why the committed default_sku stays
+	# Force10-S6000: only a -vs build repoints it, so the plain vs image
+	# is unaffected.
+	if [ "$(BUILD_MRVL_PRESTERA_PSAI_VS)" = "y" ]; then \
+		echo "$(PSAI_VS_HWSKU) t1" > ../../../device/virtual/x86_64-kvm_x86_64-r0/default_sku; \
+	else \
+		echo "Force10-S6000 t1" > ../../../device/virtual/x86_64-kvm_x86_64-r0/default_sku; \
 	fi;
 
 	# Create a new dir and copy all ONIE-platform-string-named dirs into it
@@ -27,6 +42,13 @@ $(addprefix $(DEST)/, $(MAIN_TARGET)): $(DEST)/% :
 		done; \
 	fi;
 
+	# Skip the generic BCM56850-flavored VS overwrites and the per-vendor HWSKU
+	# auto-cloning when building for marvell-prestera. The marvell-prestera-psai-vs
+	# RFS uses the Marvell Prestera VS SAI library (mrvlvslibsai) which expects
+	# SAI_INIT_CONFIG_FILE=... (shipped by the HWSKU under device/marvell/), not
+	# SAI_VS_SWITCH_TYPE_BCM56850. Overwriting sai.profile here would break
+	# syncd-marvell-prestera-psai-vs at init.
+ifneq ($(CONFIGURED_PLATFORM),marvell-prestera)
 	# Create hwsku for virtual switch
 	for d in `find -L ../../../device -maxdepth 3 -mindepth 3 -type d | grep -vE "(plugins|led-code|sonic_platform)"`; do \
 		# check if hwsku dir exists, if yes, then continue
@@ -122,6 +144,7 @@ $(addprefix $(DEST)/, $(MAIN_TARGET)): $(DEST)/% :
 			fi; \
 		done; \
 	done;
+endif
 
 	# Build the package
 ifeq ($(CROSS_BUILD_ENVIRON), y)

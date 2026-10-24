@@ -168,6 +168,13 @@ INCLUDE_VS_DASH_SAI ?= y
 # BUILD_MRVL_PRESTERA_PSAI_VS - build the marvell-prestera-psai-vs virtual flavor
 BUILD_MRVL_PRESTERA_PSAI_VS ?= n
 
+# PSAI_VS_HWSKU - which Prestera CPSS HWSKU (see the symlinks under
+# device/virtual/x86_64-kvm_x86_64-r0/) becomes the marvell-prestera-psai-vs
+# image's default_sku. Only takes effect when BUILD_MRVL_PRESTERA_PSAI_VS=y;
+# override on the command line, e.g.
+#   make target/sonic-marvell-prestera-psai-vs.bin PSAI_VS_HWSKU=db98cx8580_32cd
+PSAI_VS_HWSKU ?= rd98DX35xx_cn9131
+
 # ENABLE_AUTO_TECH_SUPPORT - Enable the configuration for event-driven techsupport & coredump mgmt feature
 ENABLE_AUTO_TECH_SUPPORT = y
 
