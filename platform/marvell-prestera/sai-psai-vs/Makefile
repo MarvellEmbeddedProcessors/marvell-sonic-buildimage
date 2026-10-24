@@ -31,11 +31,13 @@ $(DEST)/%.deb:
 	sed -i 's/^Package:.*/Package: mrvlvslibsai/' $(DEST)/.mrvlvslibsai-repack/DEBIAN/control
 	printf '%s\n' '#!/bin/sh' 'set -e' \
 		'case "$$1" in install|upgrade)' \
-		'  dpkg-divert --package mrvlvslibsai --quiet --rename --add /usr/lib/x86_64-linux-gnu/libsaivs.so.0.0.0 || true ;;' \
+		'  dpkg-divert --package mrvlvslibsai --quiet --rename --add /usr/lib/x86_64-linux-gnu/libsaivs.so.0.0.0 || true' \
+		'  dpkg-divert --package mrvlvslibsai --quiet --rename --add /usr/bin/mrvlcmd || true ;;' \
 		'esac' 'exit 0' > $(DEST)/.mrvlvslibsai-repack/DEBIAN/preinst
 	printf '%s\n' '#!/bin/sh' 'set -e' \
 		'case "$$1" in remove|purge)' \
-		'  dpkg-divert --package mrvlvslibsai --quiet --rename --remove /usr/lib/x86_64-linux-gnu/libsaivs.so.0.0.0 || true ;;' \
+		'  dpkg-divert --package mrvlvslibsai --quiet --rename --remove /usr/lib/x86_64-linux-gnu/libsaivs.so.0.0.0 || true' \
+		'  dpkg-divert --package mrvlvslibsai --quiet --rename --remove /usr/bin/mrvlcmd || true ;;' \
 		'esac' 'exit 0' > $(DEST)/.mrvlvslibsai-repack/DEBIAN/postrm
 	chmod 0755 $(DEST)/.mrvlvslibsai-repack/DEBIAN/preinst $(DEST)/.mrvlvslibsai-repack/DEBIAN/postrm
 	dpkg-deb -b $(DEST)/.mrvlvslibsai-repack $(DEST)/$(notdir $@)

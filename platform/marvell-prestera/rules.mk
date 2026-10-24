@@ -41,6 +41,10 @@ endif
 # container; no runtime switching -- selection is per-image / per-platform).
 ifeq ($(BUILD_MRVL_PRESTERA_PSAI_VS),y)
 include $(PLATFORM_PATH)/sai-psai-vs.mk
+$(LIBSAITHRIFT_DEV)_DEPENDS := $(filter-out $(MRVL_SAI),$($(LIBSAITHRIFT_DEV)_DEPENDS))
+$(LIBSAITHRIFT_DEV)_DEPENDS += $(MARVELL_PRESTERA_PSAI_VS_LIBSAI)
+$(LIBSAITHRIFT_DEV)_RDEPENDS := $(filter-out $(MRVL_SAI),$($(LIBSAITHRIFT_DEV)_RDEPENDS))
+$(LIBSAITHRIFT_DEV)_RDEPENDS += $(MARVELL_PRESTERA_PSAI_VS_LIBSAI)
 include $(PLATFORM_PATH)/onie.mk
 
 # Reuse the VS platform module from platform/vs. The cross-platform include
@@ -63,18 +67,6 @@ $(SYNCD)_RDEPENDS += $(MARVELL_PRESTERA_PSAI_VS_LIBSAI)
 # always-built libsaivs-dev install for swss without colliding on
 # /usr/lib/libsai.so + /usr/include/sai headers.
 $(SYNCD)_UNINSTALLS += $(MARVELL_PRESTERA_PSAI_VS_LIBSAI)
-# Also uninstall the real-hardware Marvell SAI. Even though $(SYNCD) does not
-# directly depend on $(MRVL_SAI) for this flavor (guarded above by
-# BUILD_MRVL_PRESTERA_PSAI_VS), libsaithrift-dev DOES
-# ($(LIBSAITHRIFT_DEV)_DEPENDS += $(MRVL_SAI) in libsaithrift-dev.mk,
-# unconditionally for every CONFIGURED_ARCH), and ENABLE_SYNCD_RPC=y pulls
-# libsaithrift-dev into $(SYNCD)_DEPENDS. That installs mrvllibsai into the
-# build container early on. mrvllibsai conflicts with libsaivs-dev (sai.mk),
-# so libsaivs-dev-install would otherwise block forever waiting for it to
-# disappear. syncd is the last consumer of the vendor SAI, so uninstalling it
-# here (exactly like the real-hw path) lets libsaivs-dev install for swss.
-$(SYNCD)_UNINSTALLS += $(MRVL_SAI)
-
 include $(PLATFORM_PATH)/docker-syncd-marvell-prestera-psai-vs.mk
 include $(PLATFORM_PATH)/one-image-psai-vs.mk
 include $(PLATFORM_PATH)/kvm-image-psai-vs.mk
