@@ -591,7 +591,7 @@ SONIC_BUILD_INSTRUCTION :=  $(MAKE) \
 						   ENABLE_MULTIDB=$(ENABLE_MULTIDB) \
                            $(SONIC_OVERRIDE_BUILD_VARS)
 
-.PHONY: sonic-slave-build sonic-slave-bash init reset
+.PHONY: sonic-slave-build sonic-slave-bash sonic-slave-run init reset psai-sync psai-build-wm psai-clean psai-full-clean psai-status
 
 
 COLLECT_BUILD_VERSION = { scripts/collect_build_version_files.sh \$$?; }
@@ -663,6 +663,54 @@ showtag:
 init :
 	$(Q)git submodule update --init --recursive
 	$(Q)git submodule foreach --recursive '[ -f .git ] && echo "gitdir: $$(realpath --relative-to=. $$(cut -d" " -f2 .git))" > .git'
+
+PSAI_PATH := platform/marvell-prestera/prestera-psai
+psai-sync :
+	$(Q)git submodule sync -- $(PSAI_PATH)
+	$(Q)git -c submodule.$(PSAI_PATH).update=checkout submodule update --init --force -- $(PSAI_PATH)
+	$(Q)( cd $(PSAI_PATH) && git submodule foreach --recursive 'git checkout -- . && git clean -fdx' ) >/dev/null 2>&1 || true
+	$(Q)( cd $(PSAI_PATH) && git submodule update --init --recursive --force )
+	$(Q)rm -f $(PSAI_PATH)/build/cpss_patch_done $(PSAI_PATH)/build/sai_patch_done
+	$(Q)git submodule foreach --recursive '[ -f .git ] && echo "gitdir: $$(realpath --relative-to=. $$(cut -d" " -f2 .git))" > .git'
+
+psai-build-wm :
+	$(Q)test -x $(PSAI_PATH)/build/build_sai_debian_pkg.sh || { echo "prestera-psai not populated; run 'make psai-sync' first"; exit 1; }
+	$(Q)mkdir -p $(PSAI_PATH)/dist/native && touch $(PSAI_PATH)/dist/native/cpss_fw_done
+	$(Q)( cd $(PSAI_PATH)/build && MAKEFLAGS= $(MAKE) cpss_apply_patch sai_apply_patch )
+	$(Q)( cd $(PSAI_PATH)/build && \
+		PYINC=$$(python3-config --includes | sed 's/-I//; s/ .*//') && \
+		PYVER=$$(basename $$PYINC | sed 's/python//') && \
+		MAKEFLAGS= $(MAKE) -j1 PYTHONINC=$$PYINC PYTHONFLAG=-lpython$$PYVER sai )
+	$(Q)( cd $(PSAI_PATH)/build && ./build_sai_debian_pkg.sh 1.18.1-2 amd64 )
+	$(Q)echo "Built: $(PSAI_PATH)/dist/mrvlvslibsai_*_amd64.deb"
+
+psai-clean :
+	$(Q)test -e $(PSAI_PATH)/.git || { echo "prestera-psai not populated; run 'make psai-sync' first"; exit 1; }
+	$(Q)( cd $(PSAI_PATH) && \
+		git clean -dfx -e build/cpss_patch_done -e build/sai_patch_done -e build/cpss_fw_done && \
+		git submodule foreach --recursive 'git clean -dfx' )
+
+psai-full-clean :
+	$(Q)test -x $(PSAI_PATH)/build/saiClean.sh || { echo "prestera-psai not populated; run 'make psai-sync' first"; exit 1; }
+	$(Q)( cd $(PSAI_PATH) && ./build/saiClean.sh )
+	$(Q)rm -f $(PSAI_PATH)/build/cpss_patch_done $(PSAI_PATH)/build/sai_patch_done $(PSAI_PATH)/build/cpss_fw_done
+	$(Q)git submodule foreach --recursive '[ -f .git ] && echo "gitdir: $$(realpath --relative-to=. $$(cut -d" " -f2 .git))" > .git'
+
+psai-status :
+	$(Q)test -e $(PSAI_PATH)/.git || { echo "prestera-psai not populated; run 'make psai-sync' first"; exit 1; }
+	$(Q)REC=$$(git ls-tree HEAD -- $(PSAI_PATH) | awk '{print $$3}'); \
+	CUR=$$(cd $(PSAI_PATH) && git rev-parse HEAD); \
+	echo "committed gitlink : $$REC"; \
+	echo "submodule HEAD    : $$CUR"; \
+	echo "submodule version : $$(cd $(PSAI_PATH) && git describe --tags --always --dirty)"; \
+	if [ "$$REC" = "$$CUR" ]; then \
+		echo "state             : up to date (nothing to commit)"; \
+	else \
+		echo "state             : DIFFERS -> record the bump with:"; \
+		echo "                        git add $(PSAI_PATH) && git commit -m 'prestera-psai: bump'"; \
+	fi
+	$(Q)echo; echo "# submodule working tree (git status -sb):"; ( cd $(PSAI_PATH) && git status -sb )
+	$(Q)echo; echo "# nested submodules (git submodule status):"; ( cd $(PSAI_PATH) && git submodule status )
 
 .ONESHELL : reset
 reset :

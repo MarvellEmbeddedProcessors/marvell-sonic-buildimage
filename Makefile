@@ -102,6 +102,12 @@ init reset:
 	@echo "+++ Making $@ +++"
 	$(MAKE) -f Makefile.work $@
 
+# Populate the prestera-psai submodule on demand, and compile+package its
+# white-model SAI deb
+psai-sync psai-build-wm psai-clean psai-full-clean psai-status:
+	@echo "+++ Making $@ +++"
+	$(MAKE) -f Makefile.work $@
+
 #
 # Function to invoke target $@ in Makefile.work with proper BLDENV
 #
