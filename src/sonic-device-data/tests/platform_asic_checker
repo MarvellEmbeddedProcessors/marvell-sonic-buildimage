@@ -42,6 +42,11 @@ def main(argv):
     # dnx and legacy-th platforms are special broadcom platforms, add them manually
     platforms.add('broadcom-dnx')
     platforms.add('broadcom-legacy-th')
+    # marvell-prestera-psai-vs is a virtual flavor of platform/marvell-prestera
+    # (gated behind BUILD_MRVL_PRESTERA_PSAI_VS), so it has no
+    # platform/marvell-prestera-psai-vs/ rules.mk of its own; add it manually
+    # like the broadcom special cases above.
+    platforms.add('marvell-prestera-psai-vs')
 
     device_folder = os.path.normpath(args.device_folder)
     base_level = len(device_folder.split(os.sep))
