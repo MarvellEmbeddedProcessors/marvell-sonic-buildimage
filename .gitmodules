@@ -167,3 +167,9 @@
 [submodule "src/supervisor"]
 	path = src/supervisor
 	url = https://github.com/Supervisor/supervisor
+[submodule "platform/marvell-prestera/prestera-psai"]
+	path = platform/marvell-prestera/prestera-psai
+	url = git@github.com:Marvell-Lab/prestera-psai.git
+	branch = SAI_7.0.1_26_06_11_T2
+	update = none
+	ignore = all
