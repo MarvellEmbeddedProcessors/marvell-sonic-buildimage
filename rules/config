@@ -36,7 +36,7 @@ SONIC_CONFIG_BUILD_JOBS = $(shell \
 
 # SONIC_CONFIG_MAKE_JOBS - set number of parallel make jobs per package.
 # Corresponding -j argument will be passed to make/dpkg commands that build separate packages
-SONIC_CONFIG_MAKE_JOBS = $(shell nproc)
+SONIC_CONFIG_MAKE_JOBS = $(shell n=$$(( $$(nproc) / 2 )); echo $$(( n < 1 ? 1 : n )))
 
 # SONIC_BUILD_MEMORY - set memory limit for the build container.
 # When set, passes --memory and --memory-swap flags to docker run.
