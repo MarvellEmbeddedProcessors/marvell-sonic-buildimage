@@ -75,31 +75,6 @@
 <path d="M570,152 L570,166 L185,166 L185,196"/>
 </g>
 
-<!-- Containers that also talk directly to kernel space (netlink, sockets,
-     etc.), not only via Redis DB / syncd / the SAI. To keep this clearly
-     separate from the containers -> Redis DB arrows below them, this is
-     routed from the TOP of each container instead, along a shared bus
-     just above the row (tucked between the "Userspace" label and the
-     row itself, so it stays inside the Userspace box and never crosses
-     that label), then down a single trunk with a comfortable gap to the
-     right of swss/syncd's right edge (x=620) into the kernel space box,
-     so there is only one arrow actually pointing down into kernel space,
-     not one per container. -->
-<g stroke="#2C2C2A" stroke-width="1.6" fill="none" marker-end="url(#arrow)">
-<path d="M98,80 L98,90"/>
-<path d="M334,80 L334,90"/>
-<path d="M452,80 L452,90"/>
-<path d="M570,80 L570,90"/>
-</g>
-<!-- Shared bus tying the risers above together (plain connector, no
-     arrowhead of its own; direction is shown at each riser's end) -->
-<path d="M98,80 L638,80" stroke="#2C2C2A" stroke-width="1.6" fill="none"/>
-<!-- Single trunk carrying the merged bus down into kernel space. It dips
-     into the small natural gap between the 2nd and 3rd ellipsis dots with
-     a short, tight curve (rather than a wide arc around the whole "..."),
-     so it never has to leave the Userspace box to clear them. -->
-<path d="M638,80 L638,115 Q645,121 638,127 L638,520" stroke="#2C2C2A" stroke-width="1.6" fill="none" marker-end="url(#arrow)"/>
-
 <!-- swss container: same column width as syncd below it, wide enough to show
      its key daemons as dotted sub-boxes -->
 <rect x="290" y="205" width="330" height="125" rx="10" fill="#FFFFFF" stroke="#1D4ED8" stroke-width="3"/>
@@ -130,12 +105,6 @@
 
 <!-- Redis DB <-> swss link: stretched so it clearly spans the gap -->
 <line x1="245" y1="268" x2="288" y2="268" stroke="#2C2C2A" stroke-width="1.6" marker-start="url(#arrow)" marker-end="url(#arrow)"/>
-
-<!-- swss also talks directly to kernel space: a short stub (with a clear
-     gap from the swss box) joining the same single trunk used by the
-     containers above, so the trunk stays one continuous downward arrow
-     rather than a second parallel line. -->
-<path d="M638,267 L620,267" stroke="#2C2C2A" stroke-width="1.6" fill="none" marker-end="url(#arrow)"/>
 
 <!-- syncd / gbsyncd containers: syncd on the left under swss; gbsyncd on the right -->
 <rect x="290" y="348" width="228" height="112" rx="12" fill="#FFFFFF" stroke="#4C1D95" stroke-width="2.4"/>
