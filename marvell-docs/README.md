@@ -11,7 +11,7 @@ documentation.
 
 ## Prerequisites
 
-- Python 3.9+
+- Python 3.12 (matches CI; 3.9+ may work for local builds)
 - `make`
 
 ## Generating the docs
@@ -173,8 +173,8 @@ create one for you.
 `sphinx-build -W`; that run also shows up as a check on any open PR for the same
 commit). The **deploy** job publishes to GitHub Pages via the **native GitHub
 Actions Pages flow** (`actions/upload-pages-artifact` + `actions/deploy-pages`)
-— there is **no `gh-pages` branch** — and only runs when a **release tag** or the
-repo's **default branch** is pushed.
+— there is **no `gh-pages` branch** — and runs when a **release tag**, a **release
+branch** (`rls-<sonic>.<minor>`), or the repo's **default branch** is pushed.
 
 Published releases are git `rls-*` tags (including `_rcN` suffixes) that also
 have a matching entry in [`SONIC/releases/releases.yaml`](SONIC/releases/releases.yaml).
@@ -182,9 +182,17 @@ Exactly one yaml entry should set `latest: true`; that version is labelled
 "(latest)" in the switcher and is the site-root redirect target. See
 [`_scripts/releases_lib.py`](_scripts/releases_lib.py).
 
+For each published tag, the deploy job uses a **rolling head tag** per release branch:
+
+- **Newest tag** on a line (e.g. `rls-01.202511.01_rc2` on `rls-202511.01`): docs are
+  built from **that branch tip**, so doc commits after the tag update the same
+  `01.202511.01_rc2/` folder until a newer tag is cut.
+- **Older tags** on the same line: frozen at the **tag commit**.
+
 | Ref | Example | Docs `version` folder | In table/switcher? |
 |-----|---------|----------------------|-------------------|
 | `rls-*` tag in yaml + git | `rls-01.202511.01_rc0` | `01.202511.01_rc0/` | yes |
+| release branch push | `rls-202511.01` | updates head tag folder only | deploy trigger |
 | other branch / tag | `docs/…`, unlisted tag | build-only / not deployed | no |
 
 The Releases table and version switcher both use the same published-release list.
@@ -195,12 +203,13 @@ The deploy job rebuilds **every published release** on each run and assembles:
 ```
 https://<pages-host>/                 # redirect to the release marked latest: true
 https://<pages-host>/versions.json    # switcher list (from releases.yaml + git)
-https://<pages-host>/<version>/       # docs built from that release tag
+https://<pages-host>/<version>/       # docs for that tag (rolling or frozen)
 ```
 
 To reproduce locally, run [`_scripts/build-site.sh`](_scripts/build-site.sh)
-(it builds each published `rls-*` tag into `<version>/` via throwaway `git worktree`s,
-then writes `versions.json` and the root redirect):
+(it builds each published tag into `<version>/` via throwaway `git worktree`s,
+using the same rolling/frozen rules as CI, then writes `versions.json` and the
+root redirect):
 
 ```sh
 marvell-docs/_scripts/build-site.sh --serve        # build all versions and serve

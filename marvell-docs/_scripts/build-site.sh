@@ -6,7 +6,9 @@
 #
 # every git "rls-*" tag that also has a releases.yaml entry (see releases_lib.py),
 # each into <site>/<version>/ (version = tag name with the "rls-" prefix stripped).
-# Then generates versions.json (latest: true first) and a root redirect to latest.
+# The newest tag on each release branch is built from that branch tip (rolling docs);
+# older tags on the same line use the tag commit (frozen). Then versions.json and
+# a root redirect to latest.
 #
 # Differences from CI (by design):
 #   * Refs are checked out into throwaway `git worktree`s, so your current
@@ -102,14 +104,15 @@ trap cleanup EXIT
 rm -rf "$SITE"
 mkdir -p "$SITE"
 
-# Build one ref (checked out into a detached worktree) into $SITE/<version>/.
-#   $1 = git ref to check out   $2 = ref name passed to conf.py via GITHUB_REF_NAME
+# Build one published tag into $SITE/<version>/.
+#   $1 = git ref to check out (tag or release-branch tip)
+#   $2 = tag name passed to conf.py via GITHUB_REF_NAME
 build_ref() {
-  local checkout_ref="$1" name="$2"
-  local v; v="$(ref_version "$name")"
+  local checkout_ref="$1" tag="$2"
+  local v; v="$(ref_version "$tag")"
   local wt="$WORKTREE_BASE/wt-$v"
 
-  echo "==> Building '$name' as version '$v'"
+  echo "==> Building tag '$tag' as version '$v' (sources from $checkout_ref)"
   if ! git -C "$REPO_ROOT" rev-parse -q --verify "${checkout_ref}^{commit}" >/dev/null; then
     echo "    skip: ref '$checkout_ref' not found"
     return 0
@@ -117,12 +120,12 @@ build_ref() {
   git -C "$REPO_ROOT" worktree add --quiet --detach "$wt" "$checkout_ref"
 
   if [ ! -f "$wt/marvell-docs/Makefile" ]; then
-    echo "    skip: no marvell-docs/ at '$name'"
+    echo "    skip: no marvell-docs/ at '$tag'"
     git -C "$REPO_ROOT" worktree remove --force "$wt"
     return 0
   fi
 
-  GITHUB_REF_NAME="$name" DOCS_SWITCHER_JSON_URL="$BASE/versions.json" \
+  GITHUB_REF_NAME="$tag" DOCS_SWITCHER_JSON_URL="$BASE/versions.json" \
     make -C "$wt/marvell-docs" html
 
   rm -rf "${SITE:?}/$v"
@@ -134,15 +137,16 @@ build_ref() {
   echo "    done: /$v/"
 }
 
-mapfile -t PUBLISHED_TAGS < <(python3 "$DOCS_DIR/_scripts/releases_lib.py" --list-tags)
-if [ "${#PUBLISHED_TAGS[@]}" -eq 0 ]; then
+build_plan="$(python3 "$DOCS_DIR/_scripts/releases_lib.py" --build-plan)"
+if [ -z "$build_plan" ]; then
   echo "error: no published releases (git rls-* tag with a releases.yaml entry)" >&2
   exit 1
 fi
 
-for tag in "${PUBLISHED_TAGS[@]}"; do
-  build_ref "$tag" "$tag"
-done
+while IFS=$'\t' read -r tag checkout_ref; do
+  [ -n "$tag" ] || continue
+  build_ref "$checkout_ref" "$tag"
+done <<< "$build_plan"
 
 if [ -z "$(ls -A "$SITE")" ]; then
   echo "error: no versions were built" >&2

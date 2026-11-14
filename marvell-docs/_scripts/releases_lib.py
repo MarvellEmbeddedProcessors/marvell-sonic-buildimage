@@ -8,6 +8,10 @@ A release appears in the table and in the version drop-down only when:
 
 Exactly one yaml entry should set ``latest: true``; that release is listed first
 in the switcher as ``<version> (latest)`` and is the site-root redirect target.
+
+Docs deploy builds each published tag into ``/<version>/``. The newest tag on each
+``release_branch`` uses that branch tip (rolling docs); older tags on the line use
+the tag commit (frozen). See ``checkout_ref_for_build()``.
 """
 from __future__ import annotations
 
@@ -124,6 +128,68 @@ def switcher_entries(pages_base: str, meta: dict | None = None) -> list[dict]:
     ]
 
 
+def tags_by_release_branch(meta: dict, tags: list[str]) -> dict[str, list[str]]:
+    """Group published tags by ``release_branch``, each list newest-first."""
+    by_line: dict[str, list[str]] = {}
+    for t in tags:
+        line = release_branch(t, meta.get(t, {}))
+        by_line.setdefault(line, []).append(t)
+    for line in by_line:
+        by_line[line].sort(key=_sort_key, reverse=True)
+    return by_line
+
+
+def head_tag_on_line(meta: dict, tags: list[str], line: str) -> str | None:
+    """Newest published tag on a release branch line, or ``None``."""
+    line_tags = tags_by_release_branch(meta, tags).get(line)
+    return line_tags[0] if line_tags else None
+
+
+def is_head_tag(tag: str, meta: dict, tags: list[str]) -> bool:
+    """True if ``tag`` is the newest published tag on its release branch line."""
+    line = release_branch(tag, meta.get(tag, {}))
+    if line == "TBD":
+        return False
+    return head_tag_on_line(meta, tags, line) == tag
+
+
+def _git_ref_exists(ref: str) -> bool:
+    try:
+        subprocess.check_output(
+            ["git", "rev-parse", "-q", "--verify", f"{ref}^{{commit}}"],
+            cwd=str(_RELEASES_DIR),
+            stderr=subprocess.DEVNULL,
+        )
+        return True
+    except (OSError, subprocess.CalledProcessError):
+        return False
+
+
+def _resolve_git_ref(ref: str) -> str | None:
+    """Return ``ref`` or ``origin/<ref>`` if either resolves to a commit."""
+    for candidate in (ref, f"origin/{ref}"):
+        if _git_ref_exists(candidate):
+            return candidate
+    return None
+
+
+def checkout_ref_for_build(tag: str, meta: dict | None = None, tags: list[str] | None = None) -> str:
+    """Git ref whose tree is built for this docs version folder.
+
+    * Newest tag on its release branch → checkout the release branch tip (rolling docs).
+    * Older tags on the line → checkout the tag commit (frozen snapshot).
+  """
+    meta = meta if meta is not None else load_releases()
+    tags = tags if tags is not None else published_tags(meta)
+    if is_head_tag(tag, meta, tags):
+        line = release_branch(tag, meta.get(tag, {}))
+        if line != "TBD":
+            resolved = _resolve_git_ref(line)
+            if resolved:
+                return resolved
+    return tag
+
+
 def release_branch(tag: str, info: dict) -> str:
     """Release branch column; optional ``release_branch`` in yaml overrides derivation."""
     if info.get("release_branch"):
@@ -138,10 +204,13 @@ def release_branch(tag: str, info: dict) -> str:
 
 
 def _sort_key(tag: str) -> tuple:
-    """Sort tags newest-first (numeric segments, then RC index)."""
+    """Sort tags newest-first on a release line.
+
+    GA tags (no ``_rcN`` suffix) rank above RCs on the same base version, so the
+  rolling docs slot follows the GA name once it exists, not the highest ``_rcN``.
+    """
     version = tag_to_version(tag)
     rc_m = re.search(r"_rc(\d+)$", version)
-    rc = int(rc_m.group(1)) if rc_m else -1
     base = re.sub(r"_rc\d+$", "", version)
     nums: tuple[int, ...] = tuple()
     for part in base.split("."):
@@ -149,13 +218,25 @@ def _sort_key(tag: str) -> tuple:
             nums += (int(part),)
         except ValueError:
             nums += (0,)
-    return (nums, rc)
+    if rc_m:
+        return (nums, 0, int(rc_m.group(1)))
+    return (nums, 1, 0)
 
 
 def _cli() -> int:
     parser = argparse.ArgumentParser(description="Release metadata helpers")
     parser.add_argument("--list-tags", action="store_true")
     parser.add_argument("--latest-version", action="store_true")
+    parser.add_argument(
+        "--checkout-for",
+        metavar="TAG",
+        help="Git ref to build for this tag (branch tip or tag commit)",
+    )
+    parser.add_argument(
+        "--build-plan",
+        action="store_true",
+        help="Lines of TAG\\tCHECKOUT_REF for each published release build",
+    )
     args = parser.parse_args()
     meta = load_releases()
     tags = published_tags(meta)
@@ -167,6 +248,13 @@ def _cli() -> int:
         if lt:
             print(tag_to_version(lt))
         return 0 if lt else 1
+    if args.checkout_for:
+        print(checkout_ref_for_build(args.checkout_for, meta, tags))
+        return 0
+    if args.build_plan:
+        for t in tags:
+            print(f"{t}\t{checkout_ref_for_build(t, meta, tags)}")
+        return 0
     return 0
 
 

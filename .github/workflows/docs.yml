@@ -4,8 +4,8 @@ name: Docs
 # fail CI thanks to `sphinx-build -W`; that run also surfaces as a check on any
 # open PR for the same commit), and DEPLOY to GitHub Pages -- via the native
 # GitHub Actions Pages flow (actions/upload-pages-artifact + actions/deploy-pages),
-# NOT a gh-pages branch -- when either a release tag OR the repo's default branch
-# is pushed.
+# NOT a gh-pages branch -- when a release tag, a release branch (rls-<sonic>.<minor>),
+# or the repo's default branch is pushed.
 #
 # Naming convention:
 #   * branches are named "rls-<sonic>.<minor>"        (e.g. rls-202511.01)
@@ -14,16 +14,19 @@ name: Docs
 # "master"), so a deployed release is always the tag form (e.g. "01.202511.01").
 #
 # Multi-version layout: because the native Pages deploy replaces the whole site
-# with a single artifact, the deploy job REBUILDS EVERY VERSION on each run by
-# checking out each ref in turn. The set of versions is:
-#   * the default branch, marked "(latest)" and used for the root redirect
-#   * every "rls-*" tag
-# Each ref is built with GITHUB_REF_NAME set to that ref, so conf.py renders the
-# correct version/release_tag with no per-ref edits.
+# with a single artifact, the deploy job REBUILDS EVERY VERSION on each run.
+# Published versions are git rls-* tags with releases.yaml entries (see
+# releases_lib.py). For each tag:
+#   * If it is the newest tag on its release branch, sources come from that
+#     branch tip (rls-<sonic>.<minor>) so doc commits after the tag update the
+#     same switcher folder until a newer tag is cut.
+#   * Older tags on the same line are frozen at their tag commits.
+# GITHUB_REF_NAME is always the tag name so conf.py version folders stay
+# tag-shaped (e.g. 01.202511.01_rc2/).
 #
-#   /                 -> redirect to the default branch's version
+#   /                 -> redirect to the release marked latest: true in yaml
 #   /versions.json    -> the list the switcher reads (generated, not maintained)
-#   /<version>/       -> docs built from the default branch or an "rls-*" tag
+#   /<version>/       -> docs for that release tag (rolling or frozen)
 #
 # One-time repo setup: Settings -> Pages -> Source = "GitHub Actions".
 
@@ -68,12 +71,38 @@ jobs:
         # False in conf.py), so no Pages URL is needed just to validate.
         run: make -C marvell-docs html
 
+  # Release-branch naming is validated in shell (not job-level matches()) so the
+  # deploy gate never depends on expression functions that vary by runner/GitHub.
+  deploy-eligibility:
+    name: Check Pages deploy eligibility
+    needs: build
+    runs-on: ubuntu-latest
+    outputs:
+      eligible: ${{ steps.check.outputs.eligible }}
+    steps:
+      - name: Decide whether to deploy
+        id: check
+        env:
+          REF_TYPE: ${{ github.ref_type }}
+          REF_NAME: ${{ github.ref_name }}
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+        run: |
+          set -euo pipefail
+          eligible=false
+          if [[ "$REF_TYPE" == "tag" ]]; then
+            eligible=true
+          elif [[ "$REF_NAME" == "$DEFAULT_BRANCH" ]]; then
+            eligible=true
+          elif [[ "$REF_TYPE" == "branch" ]] && printf '%s\n' "$REF_NAME" | grep -Eq '^rls-[0-9]+\.[0-9]+$'; then
+            eligible=true
+          fi
+          echo "Deploy eligibility for ${REF_TYPE} ${REF_NAME} -> ${eligible}"
+          echo "eligible=${eligible}" >> "$GITHUB_OUTPUT"
+
   deploy:
     name: Deploy docs to Pages
-    needs: build
-    # Deploy on release tags and on the default branch; other pushes/PRs only
-    # validate (the build job above).
-    if: github.ref_type == 'tag' || github.ref_name == github.event.repository.default_branch
+    needs: [build, deploy-eligibility]
+    if: needs.deploy-eligibility.outputs.eligible == 'true'
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -114,91 +143,13 @@ jobs:
 
       - name: Build all versions
         env:
-          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
           BASE_URL: ${{ steps.pages.outputs.base_url }}
         run: |
           set -euo pipefail
-
           BASE="${BASE_URL%/}"
           SITE="${RUNNER_TEMP}/site"
-          rm -rf "$SITE"
-          mkdir -p "$SITE"
-
-          # Remember the triggering commit: it has the current tooling
-          # (gen_versions_json.py, the redirect below). We return to it after the
-          # loop, which may leave us checked out on an older ref.
-          orig_sha="$(git rev-parse HEAD)"
-
-          # Build one ref into $SITE/<version>/. $1 = git ref to checkout,
-          # $2 = human ref name passed to conf.py via GITHUB_REF_NAME.
-          build_one() {
-            checkout_ref="$1"
-            name="$2"
-            echo "::group::Building $name"
-            git checkout -f "$checkout_ref"
-            if [ ! -f marvell-docs/Makefile ]; then
-              echo "No marvell-docs/ at $name; skipping"
-              echo "::endgroup::"
-              return 0
-            fi
-            case "$name" in
-              rls-*) v="${name#rls-}" ;;
-              *)     v="master" ;;
-            esac
-            rm -rf marvell-docs/_build
-            GITHUB_REF_NAME="$name" DOCS_SWITCHER_JSON_URL="$BASE/versions.json" \
-              make -C marvell-docs html
-            rm -rf "${SITE:?}/$v"
-            mkdir -p "$SITE/$v"
-            cp -R marvell-docs/_build/html/. "$SITE/$v/"
-            rm -rf "$SITE/$v/.doctrees"
-            echo "Built '$name' as version '$v'"
-            echo "::endgroup::"
-          }
-
-          mapfile -t PUBLISHED_TAGS < <(python3 marvell-docs/_scripts/releases_lib.py --list-tags)
-          if [ "${#PUBLISHED_TAGS[@]}" -eq 0 ]; then
-            echo "::error::No published releases (git rls-* tag with releases.yaml entry)" >&2
-            exit 1
-          fi
-          for tag in "${PUBLISHED_TAGS[@]}"; do
-            build_one "$tag" "$tag"
-          done
-
-          # Back to the triggering commit so the current tooling is used below.
-          git checkout -f "$orig_sha"
-
-          if [ -z "$(ls -A "$SITE")" ]; then
-            echo "::error::No versions were built; nothing to deploy" >&2
-            exit 1
-          fi
-
-          default_version="$(python3 marvell-docs/_scripts/releases_lib.py --latest-version)" || {
-            echo "::error::No release marked latest: true in releases.yaml" >&2
-            exit 1
-          }
-
-          python3 marvell-docs/_scripts/gen_versions_json.py "$SITE" "$BASE"
-
-          # Site-root redirect to the default branch's version. The heredoc body
-          # and closing delimiter sit at the YAML block-scalar indent (10 spaces);
-          # YAML strips that, so the shell sees "HTML" at column 0 and the heredoc
-          # terminates correctly.
-          cat > "$SITE/index.html" <<HTML
-          <!DOCTYPE html>
-          <html lang="en">
-            <head>
-              <meta charset="utf-8">
-              <meta http-equiv="refresh" content="0; url=./$default_version/">
-              <link rel="canonical" href="./$default_version/">
-              <title>Prestera SONiC Documentation</title>
-            </head>
-            <body>
-              Redirecting to <a href="./$default_version/">./$default_version/</a>&hellip;
-            </body>
-          </html>
-          HTML
-
+          # Same assembly as local builds (worktrees; rolling/frozen via --build-plan).
+          marvell-docs/_scripts/build-site.sh --output "$SITE" --base "$BASE"
           echo "Assembled site with versions:"
           ls -1 "$SITE"
 

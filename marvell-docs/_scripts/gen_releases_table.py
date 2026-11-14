@@ -6,6 +6,7 @@ See ``releases_lib.py`` for discovery rules and the version switcher.
 """
 from __future__ import annotations
 
+import html
 import os
 import sys
 from pathlib import Path
@@ -63,21 +64,29 @@ def _notes_href(version: str, current_version: str) -> str:
     return f"../../../{version}/SONIC/releases/index.html"
 
 
+def _esc_attr(value: str) -> str:
+    return html.escape(value, quote=True)
+
+
+def _esc_text(value: str) -> str:
+    return html.escape(value, quote=False)
+
+
 def _ext_link(href: str, text: str, *, title: str | None = None) -> str:
-    title_attr = f' title="{title}"' if title else ""
+    title_attr = f' title="{_esc_attr(title)}"' if title else ""
     return (
-        f'<a class="reference external" href="{href}"{title_attr} '
-        f'target="_blank" rel="noopener">{text}</a>'
+        f'<a class="reference external" href="{_esc_attr(href)}"{title_attr} '
+        f'target="_blank" rel="noopener">{_esc_text(text)}</a>'
     )
 
 
 def _github_cell(repo_url: str, branch: str) -> str:
     href = f"{repo_url}/tree/{branch}"
     return (
-        f'<a class="reference external" href="{href}" '
+        f'<a class="reference external" href="{_esc_attr(href)}" '
         f'title="View on GitHub" target="_blank" rel="noopener">'
         f'<i class="fa-brands fa-github fa-lg" aria-hidden="true"></i>'
-        f'<span class="visually-hidden">View {branch} on GitHub</span></a>'
+        f'<span class="visually-hidden">View {_esc_text(branch)} on GitHub</span></a>'
     )
 
 
@@ -86,8 +95,8 @@ def _row(tag: str, info: dict, current_version: str, repo_url: str) -> str:
     branch = release_branch(tag, info)
 
     tag_cell = (
-        f'<a class="reference internal" href="{_notes_href(version, current_version)}">'
-        f"{tag}</a>"
+        f'<a class="reference internal" href="{_esc_attr(_notes_href(version, current_version))}">'
+        f"{_esc_text(tag)}</a>"
     )
     marvell_sai = info.get("marvell_sai", "TBD")
     ocp_label = info.get("ocp_sai")
@@ -95,17 +104,17 @@ def _row(tag: str, info: dict, current_version: str, repo_url: str) -> str:
     if ocp_label and ocp_url:
         ocp_cell = _ext_link(ocp_url, ocp_label)
     else:
-        ocp_cell = ocp_label or "TBD"
+        ocp_cell = _esc_text(ocp_label or "TBD")
     lifecycle = info.get("lifecycle", "TBD")
     release_label = info.get("release", "TBD")
 
     cells = [
-        release_label,
+        _esc_text(release_label),
         tag_cell,
-        branch,
-        marvell_sai,
+        _esc_text(branch),
+        _esc_text(marvell_sai),
         ocp_cell,
-        lifecycle,
+        _esc_text(lifecycle),
         _github_cell(repo_url, branch),
     ]
     return "| " + " | ".join(cells) + " |"
