@@ -1,4 +1,4 @@
-# Build
+# Downloading and Building
 
 ## Overview
 
@@ -62,7 +62,7 @@ example, OCTEON TX2 CN9131).
 ### Platform support
 
 See the [supported Marvell
-platforms](../marvell-prestera/index.md#prestera-sonic-support) table for
+platforms](../../about/marvell-prestera/index.md#prestera-sonic-support) table for
 arm64 boards and SKUs.
 
 ### Build Commands
@@ -105,7 +105,7 @@ host for these platforms.
 ### Platform support
 
 See the [supported Marvell
-platforms](../marvell-prestera/index.md#prestera-sonic-support) table for
+platforms](../../about/marvell-prestera/index.md#prestera-sonic-support) table for
 amd64 boards and SKUs.
 
 ### Build Commands

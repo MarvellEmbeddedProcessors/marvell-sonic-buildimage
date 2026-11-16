@@ -114,26 +114,21 @@ marvell-docs/
     │   ├── index.md
     │   ├── what-is-sonic.md
     │   ├── why-marvell-sonic.md
-    │   └── images/
-    │       ├── sonic_architecture.svg
-    │       └── release-naming-convention.svg
-    ├── getting-started/           Getting Started
-    │   ├── index.md
     │   ├── marvell-prestera/
     │   │   └── index.md
-    │   ├── build/
-    │   │   └── index.md
-    │   ├── deploy-sonic-on-marvell-prestera/
-    │   │   └── index.md
     │   └── images/
+    │       ├── sonic_architecture.svg
+    │       ├── release-naming-convention.svg
     │       └── prestera-soc-naming.svg
-    ├── developers/                For Developers
+    ├── getting-started/           Getting Started
     │   ├── index.md
     │   ├── know-marvell-sonic-repositories.md
-    │   └── whitemodel-development/
-    │       ├── index.md
-    │       └── sonic-virtual-switch/
-    │           └── index.md
+    │   ├── build/
+    │   │   └── index.md
+    │   └── deploy-sonic-on-marvell-prestera/
+    │       └── index.md
+    ├── solutions/                 Solutions
+    │   └── index.md
     ├── releases/                  Releases
     │   ├── index.md
     │   ├── releases.yaml

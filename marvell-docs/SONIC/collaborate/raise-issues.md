@@ -9,7 +9,7 @@ Open an issue in the relevant Marvell repository — typically
 [marvell-sonic-buildimage](https://github.com/MarvellEmbeddedProcessors/marvell-sonic-buildimage/issues)
 for build, deployment, or platform problems, or the Marvell submodule
 repository that owns the component you are working with. See [Prestera SONiC
-Repos](../developers/know-marvell-sonic-repositories.md#prestera-sonic-repos) for
+Repos](../getting-started/know-marvell-sonic-repositories.md#prestera-sonic-repos) for
 the list of Marvell repositories.
 
 For steps on creating and filling out a GitHub issue, see the GitHub

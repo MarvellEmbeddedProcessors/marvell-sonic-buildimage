@@ -1,3 +1,3 @@
-# Deploy Prestera SONiC
+# Running Prestera SONiC
 
 *(Content coming soon.)*

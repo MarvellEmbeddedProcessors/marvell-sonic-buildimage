@@ -191,7 +191,7 @@ html {
 }
 
 /* Hover animation for the top-level section headlines (About Marvell
-   About, Getting Started, For Developers, Releases, Collaborate) in the
+   About, Getting Started, Solutions, Releases, Collaborate) in the
    navbar: grow slightly on hover (scale, not font-size, to avoid
    reflowing neighboring links). */
 .bd-navbar-elements .nav-link {

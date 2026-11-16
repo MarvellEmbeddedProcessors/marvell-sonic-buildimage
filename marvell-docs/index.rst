@@ -10,7 +10,7 @@ SONiC for Marvell Prestera
 
    About <SONIC/about/index>
    Getting Started <SONIC/getting-started/index>
-   For Developers <SONIC/developers/index>
+   Solutions <SONIC/solutions/index>
    Releases <SONIC/releases/index>
    Collaborate <SONIC/collaborate/index>
 
@@ -32,18 +32,18 @@ SONiC for Marvell Prestera
       Why choose SONiC on the Marvell Prestera platform.
 
    .. grid-item-card:: Marvell Prestera Platforms
-      :link: SONIC/getting-started/marvell-prestera/index
+      :link: SONIC/about/marvell-prestera/index
       :link-type: doc
       :text-align: center
 
       Introduction to Marvell Prestera switching silicon family.
 
-   .. grid-item-card:: Deploy Prestera SONiC
+   .. grid-item-card:: Running Prestera SONiC
       :link: SONIC/getting-started/deploy-sonic-on-marvell-prestera/index
       :link-type: doc
       :text-align: center
 
-      How to deploy Prestera SONiC on supported platforms.
+      How to run Prestera SONiC on supported platforms.
 
    .. grid-item-card:: How to Contribute
       :link: SONIC/collaborate/how-to-contribute

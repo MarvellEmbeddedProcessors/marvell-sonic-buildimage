@@ -25,7 +25,7 @@ current release branches. For example, changes for release tag
 
 Submodule-specific code changes belong in the corresponding Marvell repository
 when one exists. See [Prestera SONiC
-Repos](../developers/know-marvell-sonic-repositories.md#prestera-sonic-repos) for
+Repos](../getting-started/know-marvell-sonic-repositories.md#prestera-sonic-repos) for
 the list of Marvell repositories.
 
 If you do not find a Marvell-specific repository for a particular submodule,
