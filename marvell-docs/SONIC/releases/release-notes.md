@@ -22,4 +22,4 @@
 
 ## Known Issues
 
-*(None yet.)*
+- Warmboot is allowed when **PVST** is enabled. In future releases, warmboot will be disabled when PVST is enabled
