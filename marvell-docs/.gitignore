@@ -1,0 +1,9 @@
+_build/
+.venv/
+__pycache__/
+
+# Generated at build time by _scripts/gen_releases_table.py (see conf.py).
+SONIC/releases/_releases_table.md
+
+# Generated at build time by conf.py's setup() (conditional release-notes entry).
+SONIC/releases/_release_notes_toctree.md

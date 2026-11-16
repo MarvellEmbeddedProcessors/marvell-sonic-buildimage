@@ -1,0 +1,28 @@
+# Per-release metadata for the Releases table and version switcher.
+#
+# A release appears in the table and in the top-right version drop-down only
+# when BOTH are true:
+#   1. The git tag exists (any rls-* name, including _rc0, _rc1, ...), and
+#   2. There is a matching entry below (keyed by the exact tag name).
+#
+# Mark exactly one release with latest: true. That version is labelled
+# "(latest)" in the switcher and is the site-root redirect target on deploy.
+#
+# Optional release_branch overrides the derived release-branch column.
+#
+# Fields per release:
+#   release:        Label in the first "Release" table column.
+#   latest:         true for the current default docs version (one only).
+#   marvell_sai:    Marvell SAI version string.
+#   ocp_sai:        OCP SAI label shown in the table.
+#   ocp_sai_url:    Link target for the OCP SAI label.
+#   lifecycle:      In Development / Released Active / Released Inactive.
+#   release_branch: Optional; overrides the derived rls-<sonic>.<minor> branch.
+releases:
+  rls-02.202605.01_rc1:
+    release: "R2"
+    latest: true
+    marvell_sai: "8.20.0"
+    ocp_sai: "SAI-1.18.1"
+    ocp_sai_url: "https://github.com/opencomputeproject/SAI/releases/tag/v1.18.1"
+    lifecycle: "Released Active"

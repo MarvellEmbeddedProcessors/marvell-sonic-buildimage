@@ -4,20 +4,15 @@
 
 | BRANCH | Base Commit Hash |
 |---|---|
+| [202605](https://github.com/sonic-net/sonic-buildimage/tree/202605 | [08559af01eaca653c0345ba07785322d6f9bcfb6](https://github.com/sonic-net/sonic-buildimage/commit/08559af01eaca653c0345ba07785322d6f9bcfb6) |
 
 ## SAI Version Compatibility
 
 | | Version |
 |---|---|
+| Compatible OCP SAI Version | [SAI-1.18.1](https://github.com/opencomputeproject/SAI/releases/tag/v1.18.1) |
 
-## Supported Features
-
-- **PVST support**:
-  - **`src/sonic-stp`:** correct VLAN for untagged PVST BPDUs, consistent IPC struct packing, and interface/socket error handling.
-  - **`src/sonic-swss`:** ebtables→nft filtering for PVST, `proto_mode` in `STP_IPC_MSG`, and stpmgr fixes.
-  - **`src/sonic-utilities`:** correct STP table name and mode keyword in CLI handlers, plus added test coverage.
-  - **`sonic-buildimage`:** build/docker updates to bring up the STP service.
+## New Features
 
 ## Known Issues
 
-*(None yet.)*

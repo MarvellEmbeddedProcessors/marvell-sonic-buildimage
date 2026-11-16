@@ -1,0 +1,76 @@
+{# Custom override of the theme's navbar-nav component.
+
+   The stock theme only turns *overflow* links (past a fixed count) into a
+   "More" dropdown; it has no concept of a per-section dropdown of that
+   section's own sub-pages. Here we render each top-level section that has
+   "children" as its own hover-dropdown listing those sub-pages, so visitors
+   can jump straight to a sub-page without first landing on the section's
+   index page. A section with no "children" renders as a plain standalone tab
+   linking to whatever `doc` it points at (e.g. Releases -> the Releases page).
+
+   NOTE: the "children" lists are intentionally hand-maintained to mirror each
+   section's own `{toctree}` in its `index.md` (see marvell-docs/SONIC/*/index.md).
+   If you add/remove/reorder a section's sub-pages, update the matching entry
+   below too. #}
+{% set nav_sections = [
+  {
+    "title": "About",
+    "doc": "SONIC/about/index",
+    "children": [
+      ("What is SONiC", "SONIC/about/what-is-sonic"),
+      ("Why Prestera SONiC", "SONIC/about/why-marvell-sonic"),
+      ("Marvell Prestera Platforms", "SONIC/about/marvell-prestera/index"),
+    ],
+  },
+  {
+    "title": "Getting Started",
+    "doc": "SONIC/getting-started/index",
+    "children": [
+      ("Downloading and Building", "SONIC/getting-started/build/index"),
+      ("Running Prestera SONiC", "SONIC/getting-started/deploy-sonic-on-marvell-prestera/index"),
+      ("Prestera SONiC Repositories", "SONIC/getting-started/know-marvell-sonic-repositories"),
+    ],
+  },
+  {
+    "title": "Solutions",
+    "doc": "SONIC/solutions/index",
+  },
+  {
+    "title": "Releases",
+    "doc": "SONIC/releases/index",
+  },
+  {
+    "title": "Collaborate",
+    "doc": "SONIC/collaborate/index",
+    "children": [
+      ("How to Contribute", "SONIC/collaborate/how-to-contribute"),
+      ("Raise Issues", "SONIC/collaborate/raise-issues"),
+    ],
+  },
+] %}
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    {% for section in nav_sections %}
+      {% set section_root = section.doc.rsplit('/', 1)[0] %}
+      {% set current = pagename == section.doc or pagename.startswith(section_root ~ '/') %}
+      {% if section.children %}
+        {# Section with a hover-dropdown of its sub-pages. #}
+        <li class="nav-item dropdown bd-navbar-dropdown">
+          <a class="nav-link nav-internal{{ ' current active' if current else '' }}"
+             href="{{ pathto(section.doc) }}">{{ section.title }}</a>
+          <ul class="dropdown-menu">
+            {% for child_title, child_doc in section.children %}
+              <li><a class="dropdown-item{{ ' active' if pagename == child_doc else '' }}" href="{{ pathto(child_doc) }}">{{ child_title }}</a></li>
+            {% endfor %}
+          </ul>
+        </li>
+      {% else %}
+        {# Standalone tab: a plain link with no dropdown (e.g. Releases). #}
+        <li class="nav-item">
+          <a class="nav-link nav-internal{{ ' current active' if current else '' }}"
+             href="{{ pathto(section.doc) }}">{{ section.title }}</a>
+        </li>
+      {% endif %}
+    {% endfor %}
+  </ul>
+</nav>
