@@ -1,0 +1,76 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 560" width="1200" height="560" font-family="Helvetica,Arial,sans-serif">
+<rect width="100%" height="100%" fill="#ffffff"/>
+<text x="600" y="34" text-anchor="middle" font-size="24" font-weight="bold" fill="#1b2a41">EVPN VXLAN: VLAN 100 stretched over VNI 1000</text>
+
+<!-- hosts -->
+<rect x="10" y="215" width="130" height="90" rx="8" fill="#e9eef5" stroke="#5b6b7f" stroke-width="3"/>
+<text x="75" y="252" text-anchor="middle" font-size="22" font-weight="bold" fill="#1b2a41">host1</text>
+<text x="75" y="280" text-anchor="middle" font-size="16" fill="#1b2a41">192.168.100.11</text>
+<rect x="1060" y="215" width="130" height="90" rx="8" fill="#e9eef5" stroke="#5b6b7f" stroke-width="3"/>
+<text x="1125" y="252" text-anchor="middle" font-size="22" font-weight="bold" fill="#1b2a41">host2</text>
+<text x="1125" y="280" text-anchor="middle" font-size="16" fill="#1b2a41">192.168.100.12</text>
+
+<!-- switch1 -->
+<rect x="240" y="70" width="270" height="440" rx="10" fill="#eef4fb" stroke="#16365c" stroke-width="3"/>
+<rect x="240" y="70" width="270" height="52" rx="10" fill="#2f6fb5"/>
+<text x="375" y="94" text-anchor="middle" font-size="22" font-weight="bold" fill="#ffffff">switch1</text>
+<text x="375" y="114" text-anchor="middle" font-size="15" fill="#ffffff">BGP AS 65001</text>
+<rect x="262" y="140" width="226" height="50" rx="6" fill="#d6f0dc" stroke="#2e9a4d" stroke-width="2.5"/>
+<text x="375" y="161" text-anchor="middle" font-size="17" font-weight="bold" fill="#14532d">VLAN 100</text>
+<text x="375" y="180" text-anchor="middle" font-size="15" fill="#14532d">access port Ethernet1 (untagged)</text>
+<rect x="262" y="212" width="226" height="64" rx="6" fill="#fff3cd" stroke="#b58900" stroke-width="2.5"/>
+<text x="375" y="236" text-anchor="middle" font-size="17" font-weight="bold" fill="#5c4400">SVI Vlan100</text>
+<text x="375" y="258" text-anchor="middle" font-size="16" fill="#5c4400">192.168.100.1/24</text>
+<rect x="262" y="298" width="226" height="64" rx="6" fill="#ffe3c2" stroke="#e08a00" stroke-width="2.5"/>
+<text x="375" y="322" text-anchor="middle" font-size="17" font-weight="bold" fill="#7a4300">VNI 1000</text>
+<text x="375" y="344" text-anchor="middle" font-size="16" fill="#7a4300">VLAN 100 &#8596; VNI 1000</text>
+<rect x="262" y="384" width="226" height="64" rx="6" fill="#ffd0cc" stroke="#d9534f" stroke-width="2.5"/>
+<text x="375" y="408" text-anchor="middle" font-size="17" font-weight="bold" fill="#7f1d1d">VTEP vtep1</text>
+<text x="375" y="430" text-anchor="middle" font-size="16" fill="#7f1d1d">source IP 10.1.1.0</text>
+<text x="375" y="478" text-anchor="middle" font-size="15" fill="#16365c">underlay port Ethernet0</text>
+<text x="375" y="497" text-anchor="middle" font-size="15" fill="#16365c">10.1.1.0/31</text>
+
+<!-- switch2 -->
+<rect x="690" y="70" width="270" height="440" rx="10" fill="#eef4fb" stroke="#16365c" stroke-width="3"/>
+<rect x="690" y="70" width="270" height="52" rx="10" fill="#2f6fb5"/>
+<text x="825" y="94" text-anchor="middle" font-size="22" font-weight="bold" fill="#ffffff">switch2</text>
+<text x="825" y="114" text-anchor="middle" font-size="15" fill="#ffffff">BGP AS 65002</text>
+<rect x="712" y="140" width="226" height="50" rx="6" fill="#d6f0dc" stroke="#2e9a4d" stroke-width="2.5"/>
+<text x="825" y="161" text-anchor="middle" font-size="17" font-weight="bold" fill="#14532d">VLAN 100</text>
+<text x="825" y="180" text-anchor="middle" font-size="15" fill="#14532d">access port Ethernet1 (untagged)</text>
+<rect x="712" y="212" width="226" height="64" rx="6" fill="#fff3cd" stroke="#b58900" stroke-width="2.5"/>
+<text x="825" y="236" text-anchor="middle" font-size="17" font-weight="bold" fill="#5c4400">SVI Vlan100</text>
+<text x="825" y="258" text-anchor="middle" font-size="16" fill="#5c4400">192.168.100.2/24</text>
+<rect x="712" y="298" width="226" height="64" rx="6" fill="#ffe3c2" stroke="#e08a00" stroke-width="2.5"/>
+<text x="825" y="322" text-anchor="middle" font-size="17" font-weight="bold" fill="#7a4300">VNI 1000</text>
+<text x="825" y="344" text-anchor="middle" font-size="16" fill="#7a4300">VLAN 100 &#8596; VNI 1000</text>
+<rect x="712" y="384" width="226" height="64" rx="6" fill="#ffd0cc" stroke="#d9534f" stroke-width="2.5"/>
+<text x="825" y="408" text-anchor="middle" font-size="17" font-weight="bold" fill="#7f1d1d">VTEP vtep1</text>
+<text x="825" y="430" text-anchor="middle" font-size="16" fill="#7f1d1d">source IP 10.1.1.1</text>
+<text x="825" y="478" text-anchor="middle" font-size="15" fill="#16365c">underlay port Ethernet0</text>
+<text x="825" y="497" text-anchor="middle" font-size="15" fill="#16365c">10.1.1.1/31</text>
+
+<!-- access links -->
+<line x1="140" y1="260" x2="240" y2="260" stroke="#2e9a4d" stroke-width="5"/>
+<text x="190" y="246" text-anchor="middle" font-size="15" font-weight="bold" fill="#14532d">Ethernet1</text>
+<text x="190" y="284" text-anchor="middle" font-size="14" fill="#14532d">access port</text>
+<line x1="960" y1="260" x2="1060" y2="260" stroke="#2e9a4d" stroke-width="5"/>
+<text x="1010" y="246" text-anchor="middle" font-size="15" font-weight="bold" fill="#14532d">Ethernet1</text>
+<text x="1010" y="284" text-anchor="middle" font-size="14" fill="#14532d">access port</text>
+
+<!-- underlay -->
+<line x1="510" y1="488" x2="690" y2="488" stroke="#d9534f" stroke-width="5"/>
+<text x="600" y="474" text-anchor="middle" font-size="15" font-weight="bold" fill="#d9534f">underlay link</text>
+<text x="600" y="512" text-anchor="middle" font-size="14" fill="#d9534f">Ethernet0 - Ethernet0</text>
+
+<!-- bgp -->
+<line x1="510" y1="165" x2="690" y2="165" stroke="#2f6fb5" stroke-width="3" stroke-dasharray="10 6"/>
+<text x="600" y="150" text-anchor="middle" font-size="15" font-weight="bold" fill="#2f6fb5">eBGP L2VPN-EVPN</text>
+<text x="600" y="186" text-anchor="middle" font-size="14" fill="#2f6fb5">10.1.1.0 &#8596; 10.1.1.1</text>
+
+<!-- vxlan tunnel -->
+<line x1="488" y1="416" x2="712" y2="416" stroke="#e08a00" stroke-width="6" stroke-dasharray="14 7"/>
+<text x="600" y="380" text-anchor="middle" font-size="16" font-weight="bold" fill="#b86e00">VXLAN tunnel</text>
+<text x="600" y="400" text-anchor="middle" font-size="15" fill="#b86e00">VNI 1000, UDP 4789</text>
+<text x="600" y="440" text-anchor="middle" font-size="14" fill="#b86e00">VTEP 10.1.1.0 &#8596; 10.1.1.1</text>
+</svg>

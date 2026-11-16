@@ -11,7 +11,9 @@
    NOTE: the "children" lists are intentionally hand-maintained to mirror each
    section's own `{toctree}` in its `index.md` (see marvell-docs/SONIC/*/index.md).
    If you add/remove/reorder a section's sub-pages, update the matching entry
-   below too. #}
+   below too. A child tuple may carry an optional third element: a list of
+   (title, doc) sub-pages, shown in a fly-out submenu to the right when the
+   pointer hovers that child (e.g. Solutions > Tunnels > EVPN). #}
 {% set nav_sections = [
   {
     "title": "About",
@@ -34,6 +36,11 @@
   {
     "title": "Solutions",
     "doc": "SONIC/solutions/index",
+    "children": [
+      ("Tunnels", "SONIC/solutions/tunnels/index", [
+        ("EVPN", "SONIC/solutions/tunnels/evpn"),
+      ]),
+    ],
   },
   {
     "title": "Releases",
@@ -59,8 +66,23 @@
           <a class="nav-link nav-internal{{ ' current active' if current else '' }}"
              href="{{ pathto(section.doc) }}">{{ section.title }}</a>
           <ul class="dropdown-menu">
-            {% for child_title, child_doc in section.children %}
-              <li><a class="dropdown-item{{ ' active' if pagename == child_doc else '' }}" href="{{ pathto(child_doc) }}">{{ child_title }}</a></li>
+            {% for child in section.children %}
+              {% set child_title = child[0] %}
+              {% set child_doc = child[1] %}
+              {% set grandchildren = child[2] if child|length > 2 else [] %}
+              {% if grandchildren %}
+                {% set sub_current = pagename == child_doc or (grandchildren | selectattr(1, 'equalto', pagename) | list | length > 0) %}
+                <li class="dropdown-submenu">
+                  <a class="dropdown-item dropdown-submenu-toggle{{ ' active' if sub_current else '' }}" href="{{ pathto(child_doc) }}">{{ child_title }}</a>
+                  <ul class="dropdown-submenu-list">
+                    {% for gc_title, gc_doc in grandchildren %}
+                      <li><a class="dropdown-item{{ ' active' if pagename == gc_doc else '' }}" href="{{ pathto(gc_doc) }}">{{ gc_title }}</a></li>
+                    {% endfor %}
+                  </ul>
+                </li>
+              {% else %}
+                <li><a class="dropdown-item{{ ' active' if pagename == child_doc else '' }}" href="{{ pathto(child_doc) }}">{{ child_title }}</a></li>
+              {% endif %}
             {% endfor %}
           </ul>
         </li>

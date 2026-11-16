@@ -247,6 +247,49 @@ html {
   transition: background-color 0.15s ease, color 0.15s ease;
 }
 
+/* Fly-out submenu (e.g. Solutions > Tunnels > EVPN): hovering the parent
+   entry opens its sub-pages to the right. Pure CSS; the submenu sits flush
+   against the parent (left: 100%, no gap) so the pointer can travel into it. */
+.bd-navbar-elements .nav-item.bd-navbar-dropdown .dropdown-submenu {
+  position: relative;
+}
+
+/* A dropdown that only holds fly-out entries (Solutions) does not need the
+   15rem minimum the section menus use; size it to its content. */
+.bd-navbar-elements .nav-item.bd-navbar-dropdown > .dropdown-menu:has(.dropdown-submenu) {
+  min-width: 0 !important;
+  width: max-content;
+}
+
+.bd-navbar-elements .nav-item.bd-navbar-dropdown .dropdown-submenu-toggle::after {
+  content: "\25B8";
+  float: right;
+  margin-left: 0.75rem;
+  opacity: 0.7;
+}
+
+.bd-navbar-elements .nav-item.bd-navbar-dropdown .dropdown-submenu-list {
+  display: none;
+  position: absolute;
+  top: -0.4rem;
+  left: 100%;
+  margin: 0;
+  padding: 0.4rem 0;
+  list-style: none;
+  min-width: 0;
+  width: max-content;
+  border-radius: 0.5rem;
+  background-color: var(--pst-color-surface, #fff);
+  border: 1px solid var(--pst-color-border, rgba(0, 0, 0, 0.15));
+  box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.18);
+  z-index: 1090;
+}
+
+.bd-navbar-elements .nav-item.bd-navbar-dropdown .dropdown-submenu:hover > .dropdown-submenu-list,
+.bd-navbar-elements .nav-item.bd-navbar-dropdown .dropdown-submenu:focus-within > .dropdown-submenu-list {
+  display: block;
+}
+
 .bd-navbar-elements .nav-item.bd-navbar-dropdown .dropdown-item:hover,
 .bd-navbar-elements .nav-item.bd-navbar-dropdown .dropdown-item:focus,
 .bd-navbar-elements .nav-item.bd-navbar-dropdown .dropdown-item.active {
