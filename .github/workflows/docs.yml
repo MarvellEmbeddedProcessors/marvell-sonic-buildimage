@@ -38,6 +38,9 @@ on:
       - 'rls-*'
   workflow_dispatch:
 
+env:
+  DOCS_RELEASES_POLICY_BRANCH: rls-202511.01
+
 # Least privilege by default; the deploy job widens this for the Pages deploy.
 permissions:
   contents: read
@@ -133,6 +136,16 @@ jobs:
 
       - name: Install doc-build dependencies
         run: pip install -r marvell-docs/requirements.txt
+
+      - name: Materialize canonical release metadata
+        if: github.ref_name != env.DOCS_RELEASES_POLICY_BRANCH
+        run: |
+          set -euo pipefail
+          policy="${{ env.DOCS_RELEASES_POLICY_BRANCH }}"
+          git fetch origin "${policy}"
+          git checkout "origin/${policy}" -- \
+            marvell-docs/SONIC/releases/releases.yaml \
+            marvell-docs/_scripts/build-site.sh
 
       - name: Configure Pages
         id: pages
