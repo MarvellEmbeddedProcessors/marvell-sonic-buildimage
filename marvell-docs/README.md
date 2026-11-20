@@ -48,199 +48,53 @@ Then browse to <http://localhost:8000>.
 make -C marvell-docs clean
 ```
 
-## Adding content
+## Design
 
-Each top-level section is a **folder with an `index.md`** inside
-`marvell-docs/SONIC/` (e.g. `marvell-docs/SONIC/getting-started/index.md`). To add a new
-top-level section:
+### Build modes
 
-1. Create `marvell-docs/SONIC/my-section/index.md`.
-2. Reference it from the `{toctree}` in [`marvell-docs/index.rst`](index.rst), for
-   example:
+There are two build modes:
 
-   ```rst
-   .. toctree::
-      :maxdepth: 1
-      :hidden:
-      :caption: Sections
+1. **Single-version** — `make -C marvell-docs html` (or the Docs workflow *validate*
+   job on every push). Sphinx reads the **current checkout** and writes
+   `marvell-docs/_build/html/`.
 
-      About Prestera SONiC <SONIC/about/index>
-      Getting Started <SONIC/getting-started/index>
-      My Section <SONIC/my-section/index>
-   ```
+2. **Multi-version site** — [`_scripts/build-site.sh`](_scripts/build-site.sh):
+   For every **published** release (tags mentioned in
+   R1/marvell-docs/releases/releases.yaml), docs are generated and presented as
+   drop-down menu in website. Each release docs separates from other release
+   branch's docs.
 
-3. Add a matching card to the landing-page grid in `marvell-docs/index.rst` if it
-   should appear on the front page.
+### Workflow
 
-To add a sub-page within an existing section, drop another `.md` file next
-to that section's `index.md` and reference it from a `{toctree}` inside
-that section's `index.md`.
+- Multi-site is built for each release tag entry mentioned in
+  [`releases.yaml`](https://github.com/Marvell-Lab/sonic-buildimage/blob/rls-202511.01/marvell-docs/SONIC/releases/releases.yaml).
+  Docs generation fails either release-tag is not applied or entry missing in
+  `releases.yaml` file.
+- Release tags is in format `rls-<majorno>.<sonic-branch>.<minorno>[_rcX]` and
+  can be on any rls-* branch
 
-### Adding images
+### Rolling commits over release-tag
 
-- **Page-specific images** (diagrams, screenshots): put them in a single
-  `images/` subfolder at the **top-level heading folder** (e.g.
-  `marvell-docs/SONIC/about/images/diagram.png`) — never inside a nested sub-page's
-  own folder. Reference them with a relative path from wherever the page
-  lives, e.g. `![alt text](images/diagram.png)` from a page directly under
-  `about/`, or `![alt text](../images/diagram.png)` from a page one level
-  deeper (e.g. `about/releases/`).
-- **Shared/site-wide images** (logo, favicon, icons reused across pages):
-  put them under `marvell-docs/_static/images/` (e.g.
-  `marvell-docs/_static/images/marvell_sonic_logo.png`) and reference them with a
-  path rooted at `_static/`, e.g. `![alt text](/_static/images/foo.png)`
-  or via `html_logo` / `html_favicon` in `conf.py`.
-- **Release-naming diagram**: `SONIC/about/images/release-naming-convention.svg`
-  is a **committed static asset** — the convention is fixed, so it is *not*
-  generated at build time. If the convention ever changes, regenerate it with
-  [`_scripts/gen_release_naming_svg.py`](_scripts/gen_release_naming_svg.py)
-  (`RELEASE_VERSION=01.202511.01 python marvell-docs/_scripts/gen_release_naming_svg.py`,
-  needs `matplotlib` installed separately) and commit the updated SVG.
+Typically docs are generated corresponding to a release-tag. However on latest
+release-tag(on a branch), any new doc commits becomes part of that tag's
+documentation until next-tag on that branch is not applied. As soon as next-tag
+is applied, newest doc-commits becomes part of `next-tag` docs. The previous
+release-tag documentation goes back to commit-hash on which release-tag is
+applied.
 
-## Layout
+### R1 is the main docs branch
 
-```
-marvell-docs/
-├── conf.py                     Sphinx configuration
-├── index.rst                   Top-level landing page
-├── Makefile                    `make html` / `make clean` targets
-├── requirements.txt            Pinned Python dependencies for the doc build
-├── _static/                    Static assets (CSS, JS)
-│   ├── css/                    Custom stylesheet(s)
-│   └── images/                 Shared/site-wide images (logo, favicon, ...)
-├── _templates/                 Custom HTML templates
-└── SONIC/                      SONiC-specific content, authored in Markdown
-    ├── about/                    About
-    │   ├── index.md
-    │   ├── what-is-sonic.md
-    │   ├── why-marvell-sonic.md
-    │   ├── marvell-prestera/
-    │   │   └── index.md
-    │   └── images/
-    │       ├── sonic_architecture.svg
-    │       ├── release-naming-convention.svg
-    │       └── prestera-soc-naming.svg
-    ├── getting-started/           Getting Started
-    │   ├── index.md
-    │   ├── know-marvell-sonic-repositories.md
-    │   ├── build/
-    │   │   └── index.md
-    │   └── deploy-sonic-on-marvell-prestera/
-    │       └── index.md
-    ├── solutions/                 Solutions
-    │   └── index.md
-    ├── releases/                  Releases
-    │   ├── index.md
-    │   ├── releases.yaml
-    │   └── release-notes.md
-    └── collaborate/               Collaborate
-        ├── index.md
-        ├── how-to-contribute.md
-        └── raise-issues.md
-```
+R1 is the main branch for generating the website. That is why
+[`releases.yaml`](https://github.com/Marvell-Lab/sonic-buildimage/blob/rls-202511.01/marvell-docs/SONIC/releases/releases.yaml)
+is relevant and releases.yaml on other release branches are NO-OP.
 
-## AI Agent Guidelines
-
-Conventions established for this docs site (folder structure, naming,
-styling, build/verify workflow, etc.) are captured in a Cursor rule at
-[`.cursor/rules/sonic-docs.mdc`](../.cursor/rules/sonic-docs.mdc), scoped to
-`marvell-docs/**`. It's automatically surfaced to Cursor/AI agents working on files
-under `marvell-docs/`, so future additions stay consistent instead of re-deciding
-(or drifting from) decisions already made here.
-
-To add to it (e.g. after establishing a new convention):
-
-1. Open `.cursor/rules/sonic-docs.mdc`.
-2. Add a concise, actionable bullet under the relevant section (or add a new
-   `##` section if it's a new category of convention).
-3. Keep it short — this is a quick-reference for an agent, not a full guide;
-   link out to this README or other docs for longer explanations.
-
-To create an additional, differently-scoped rule (e.g. one that applies
-outside `marvell-docs/`), see the general
-[Cursor rules docs](https://cursor.com/docs/context/rules) or ask an agent to
-create one for you.
-
-## Publishing to GitHub Pages
-
-[`.github/workflows/docs.yml`](../.github/workflows/docs.yml) has two jobs. The
-**build** job compiles the docs on every push (a broken build fails CI thanks to
-`sphinx-build -W`; that run also shows up as a check on any open PR for the same
-commit). The **deploy** job publishes to GitHub Pages via the **native GitHub
-Actions Pages flow** (`actions/upload-pages-artifact` + `actions/deploy-pages`)
-— there is **no `gh-pages` branch** — and runs when a **release tag**, a **release
-branch** (`rls-<sonic>.<minor>`), or the repo's **default branch** is pushed.
-
-Published releases are git `rls-*` tags (including `_rcN` suffixes) that also
-have a matching entry in [`SONIC/releases/releases.yaml`](SONIC/releases/releases.yaml).
-Exactly one yaml entry should set `latest: true`; that version is labelled
-"(latest)" in the switcher and is the site-root redirect target. See
-[`_scripts/releases_lib.py`](_scripts/releases_lib.py).
-
-For each published tag, the deploy job uses a **rolling head tag** per release branch:
-
-- **Newest tag** on a line (e.g. `rls-01.202511.01_rc2` on `rls-202511.01`): docs are
-  built from **that branch tip**, so doc commits after the tag update the same
-  `01.202511.01_rc2/` folder until a newer tag is cut.
-- **Older tags** on the same line: frozen at the **tag commit**.
-
-| Ref | Example | Docs `version` folder | In table/switcher? |
-|-----|---------|----------------------|-------------------|
-| `rls-*` tag in yaml + git | `rls-01.202511.01_rc0` | `01.202511.01_rc0/` | yes |
-| release branch push | `rls-202511.01` | updates head tag folder only | deploy trigger |
-| other branch / tag | `docs/…`, unlisted tag | build-only / not deployed | no |
-
-The Releases table and version switcher both use the same published-release list.
-The release-notes page title shows `{{ release_tag }}` for each deployed tag build.
-
-The deploy job rebuilds **every published release** on each run and assembles:
-
-```
-https://<pages-host>/                 # redirect to the release marked latest: true
-https://<pages-host>/versions.json    # switcher list (from releases.yaml + git)
-https://<pages-host>/<version>/       # docs for that tag (rolling or frozen)
-```
-
-To reproduce locally, run [`_scripts/build-site.sh`](_scripts/build-site.sh)
-(it builds each published tag into `<version>/` via throwaway `git worktree`s,
-using the same rolling/frozen rules as CI, then writes `versions.json` and the
-root redirect):
-
-```sh
-marvell-docs/_scripts/build-site.sh --serve        # build all versions and serve
-marvell-docs/_scripts/build-site.sh --venv --serve # also set up a venv from requirements.txt
-```
-
-It builds committed refs (commit/tag to preview a release); to preview
-uncommitted edits on the current branch, use `make -C marvell-docs html`.
-
-The exact `<pages-host>` is resolved by `actions/configure-pages`, so it works on
-github.com, GitHub Enterprise, and custom-domain/private `*.pages.github.io`
-hosts alike, with no host hard-coded. A version appears only if its ref (the
-default branch or an `rls-*` tag) still builds.
-
-The version switcher list (`versions.json`) is **generated automatically** on
-every deploy by [`_scripts/gen_versions_json.py`](_scripts/gen_versions_json.py),
-which scans the `<version>/` folders just built. So the dropdown always reflects
-what's deployed and there is **no file to hand-maintain**. The switcher's
-`json_url` uses the same resolved Pages URL. (pydata-sphinx-theme requires a
-fully-resolved `json_url`; relative paths are not supported. Its build-time
-switcher fetch is disabled via `check_switcher: False` in `conf.py`, so the list
-is only read client-side after deploy and the build never fails on it.) For local
-preview, set `DOCS_SWITCHER_JSON_URL` to point the switcher at a served file.
-
-One-time repo setup required: in **Settings → Pages**, set **Source** to
-**GitHub Actions**. (The same setting is needed on the public mirror repo.)
-
-### Publishing a new release version
-
-1. Tag the release commit `rls-<major>.<sonic>.<minor>` (e.g. `rls-01.202511.01`)
-   and push the tag. `conf.py` derives the `<version>` subfolder (`01.202511.01`)
-   and the switcher's `version_match` from it — nothing to edit in `conf.py`.
-2. That's it. The workflow rebuilds all versions, adds the `01.202511.01/`
-   subfolder, and **regenerates `versions.json`** so the new version shows up in
-   the dropdown — no file to edit. You can also re-run it on a tag via **Run
-   workflow**.
-
-> The switcher URL comes from the repo's own GitHub Pages site (resolved by
-> `actions/configure-pages`), so nothing needs editing per repo or per host.
+However other rls-* branches must have following changes
+- **marvell-docs**: Each docs content per release is separate and independent.
+  It is possible to have separate layout per release tags
+- **docs.yml**: Each rls-* branch should have `docs.yml` file to allow to
+  generate docs when any new commits is pushed to these branche
+- **release-notes.md**: Each rls-* has to maintain separate [`releases
+  notes`](https://github.com/Marvell-Lab/sonic-buildimage/blob/rls-20605.01/marvell-docs/SONIC/releases/releases-notes.md).
+  Docs scripts adds release-tags and hyperlinks to
+  [`release`](https://jubilant-adventure-gwy7y5m.pages.github.io/02.202605.01_rc0/SONIC/releases/index.html)
+  page.

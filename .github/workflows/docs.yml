@@ -1,34 +1,12 @@
 name: Docs
 
-# Build the Sphinx documentation in marvell-docs/ on EVERY push (so broken docs
-# fail CI thanks to `sphinx-build -W`; that run also surfaces as a check on any
-# open PR for the same commit), and DEPLOY to GitHub Pages -- via the native
-# GitHub Actions Pages flow (upload-pages-artifact + deploy-pages; Node 24 action runtimes),
-# NOT a gh-pages branch -- when a release tag, a release branch (rls-<sonic>.<minor>),
-# or the repo's default branch is pushed.
+# Build marvell-docs on every push on any rls-* branch or tag mentioned in
+# rls-202511.01:/marvell-docss/SONiC/releases/releases.yaml
 #
-# Naming convention:
-#   * branches are named "rls-<sonic>.<minor>"        (e.g. rls-202511.01)
-#   * release tags are named "rls-<major>.<sonic>.<minor>" (e.g. rls-01.202511.01)
-# conf.py derives the docs `version` from the ref name (strip "rls-", else
-# "master"), so a deployed release is always the tag form (e.g. "01.202511.01").
-#
-# Multi-version layout: because the native Pages deploy replaces the whole site
-# with a single artifact, the deploy job REBUILDS EVERY VERSION on each run.
-# Published versions are git rls-* tags with releases.yaml entries (see
-# releases_lib.py). For each tag:
-#   * If it is the newest tag on its release branch, sources come from that
-#     branch tip (rls-<sonic>.<minor>) so doc commits after the tag update the
-#     same switcher folder until a newer tag is cut.
-#   * Older tags on the same line are frozen at their tag commits.
-# GITHUB_REF_NAME is always the tag name so conf.py version folders stay
-# tag-shaped (e.g. 01.202511.01_rc2/).
-#
-#   /                 -> redirect to the release marked latest: true in yaml
-#   /versions.json    -> the list the switcher reads (generated, not maintained)
-#   /<version>/       -> docs for that release tag (rolling or frozen)
-#
-# One-time repo setup: Settings -> Pages -> Source = "GitHub Actions".
+# This is the main branch to generate docs while other release branches maintains
+# - marvell-docs/<core-content>
+# - SONIC/releases/release-notes.md
+# - .github/workflows/docs.html (to trigger docs-gen here, when commit pushed on those branches
 
 on:
   push:
@@ -41,7 +19,6 @@ on:
 env:
   DOCS_RELEASES_POLICY_BRANCH: rls-202511.01
 
-# Least privilege by default; the deploy job widens this for the Pages deploy.
 permissions:
   contents: read
 
@@ -49,8 +26,6 @@ jobs:
   build:
     name: Build docs (validate)
     runs-on: ubuntu-latest
-    # Validate the pushed ref on every push. Superseded validation builds may be
-    # cancelled since they're cheap to re-run.
     concurrency:
       group: docs-build-${{ github.ref }}
       cancel-in-progress: true
@@ -69,13 +44,8 @@ jobs:
         run: pip install -r marvell-docs/requirements.txt
 
       - name: Build HTML docs
-        # `-W` (set in the Makefile) turns warnings into errors, so broken docs
-        # fail here. The switcher isn't fetched at build time (check_switcher is
-        # False in conf.py), so no Pages URL is needed just to validate.
         run: make -C marvell-docs html
 
-  # Release-branch naming is validated in shell (not job-level matches()) so the
-  # deploy gate never depends on expression functions that vary by runner/GitHub.
   deploy-eligibility:
     name: Check Pages deploy eligibility
     needs: build
@@ -89,14 +59,18 @@ jobs:
           REF_TYPE: ${{ github.ref_type }}
           REF_NAME: ${{ github.ref_name }}
           DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+          POLICY_BRANCH: ${{ env.DOCS_RELEASES_POLICY_BRANCH }}
+          EVENT_NAME: ${{ github.event_name }}
         run: |
           set -euo pipefail
           eligible=false
-          if [[ "$REF_TYPE" == "tag" ]]; then
+          if [[ "$EVENT_NAME" == "workflow_dispatch" ]]; then
+            eligible=true
+          elif [[ "$REF_TYPE" == "tag" ]]; then
             eligible=true
           elif [[ "$REF_NAME" == "$DEFAULT_BRANCH" ]]; then
             eligible=true
-          elif [[ "$REF_TYPE" == "branch" ]] && printf '%s\n' "$REF_NAME" | grep -Eq '^rls-[0-9]+\.[0-9]+$'; then
+          elif [[ "$REF_NAME" == "$POLICY_BRANCH" ]]; then
             eligible=true
           fi
           echo "Deploy eligibility for ${REF_TYPE} ${REF_NAME} -> ${eligible}"
@@ -114,7 +88,6 @@ jobs:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-    # Never cancel an in-progress Pages deploy; serialize them instead.
     concurrency:
       group: pages
       cancel-in-progress: false
@@ -122,8 +95,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v5
         with:
-          # Full history + tags: the deploy loop checks out every rls-* tag and
-          # the default branch to rebuild all versions.
           fetch-depth: 0
           fetch-tags: true
 
@@ -149,9 +120,6 @@ jobs:
 
       - name: Configure Pages
         id: pages
-        # Resolves this repo's real Pages base URL (works on github.com, GitHub
-        # Enterprise, and custom-domain/private *.pages.github.io hosts). Used for
-        # the switcher's json_url and the version links in versions.json.
         uses: actions/configure-pages@v6
 
       - name: Build all versions
@@ -161,7 +129,6 @@ jobs:
           set -euo pipefail
           BASE="${BASE_URL%/}"
           SITE="${RUNNER_TEMP}/site"
-          # Same assembly as local builds (worktrees; rolling/frozen via --build-plan).
           marvell-docs/_scripts/build-site.sh --output "$SITE" --base "$BASE"
           echo "Assembled site with versions:"
           ls -1 "$SITE"
