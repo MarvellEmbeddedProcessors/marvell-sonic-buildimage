@@ -19,6 +19,14 @@
 #   lifecycle:      In Development / Released Active / Released Inactive.
 #   release_branch: Optional; overrides the derived rls-<sonic>.<minor> branch.
 releases:
+  rls-02.202605.01_rc0:
+    release: "R2"
+    latest: false
+    marvell_sai: "8.20.0"
+    ocp_sai: "SAI-1.18.1"
+    ocp_sai_url: "https://github.com/opencomputeproject/SAI/releases/tag/v1.18.1"
+    lifecycle: "In Development"
+
   rls-01.202511.01:
     release: "R1"
     latest: true
@@ -26,3 +34,5 @@ releases:
     ocp_sai: "SAI-1.17.1"
     ocp_sai_url: "https://github.com/opencomputeproject/SAI/releases/tag/v1.17.1"
     lifecycle: "Released Active"
+
+
