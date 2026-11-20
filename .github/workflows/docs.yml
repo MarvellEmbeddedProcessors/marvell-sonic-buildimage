@@ -3,7 +3,7 @@ name: Docs
 # Build the Sphinx documentation in marvell-docs/ on EVERY push (so broken docs
 # fail CI thanks to `sphinx-build -W`; that run also surfaces as a check on any
 # open PR for the same commit), and DEPLOY to GitHub Pages -- via the native
-# GitHub Actions Pages flow (actions/upload-pages-artifact + actions/deploy-pages),
+# GitHub Actions Pages flow (upload-pages-artifact + deploy-pages; Node 24 action runtimes),
 # NOT a gh-pages branch -- when a release tag, a release branch (rls-<sonic>.<minor>),
 # or the repo's default branch is pushed.
 #
@@ -53,10 +53,10 @@ jobs:
       cancel-in-progress: true
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: '3.12'
           cache: pip
@@ -117,7 +117,7 @@ jobs:
       cancel-in-progress: false
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           # Full history + tags: the deploy loop checks out every rls-* tag and
           # the default branch to rebuild all versions.
@@ -125,7 +125,7 @@ jobs:
           fetch-tags: true
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: '3.12'
           cache: pip
@@ -139,7 +139,7 @@ jobs:
         # Resolves this repo's real Pages base URL (works on github.com, GitHub
         # Enterprise, and custom-domain/private *.pages.github.io hosts). Used for
         # the switcher's json_url and the version links in versions.json.
-        uses: actions/configure-pages@v5
+        uses: actions/configure-pages@v6
 
       - name: Build all versions
         env:
@@ -154,10 +154,10 @@ jobs:
           ls -1 "$SITE"
 
       - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v5
         with:
           path: ${{ runner.temp }}/site
 
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5

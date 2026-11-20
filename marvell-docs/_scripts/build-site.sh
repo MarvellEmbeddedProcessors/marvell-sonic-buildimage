@@ -125,6 +125,14 @@ build_ref() {
     return 0
   fi
 
+  # Release metadata (releases.yaml) is canonical on the branch that invoked this
+  # script (e.g. rls-202511.01). R2 line may keep an empty stub; overlay so
+  # rolling builds from rls-202605.01 still see the switcher / releases table.
+  if [ -f "$DOCS_DIR/SONIC/releases/releases.yaml" ]; then
+    cp "$DOCS_DIR/SONIC/releases/releases.yaml" \
+      "$wt/marvell-docs/SONIC/releases/releases.yaml"
+  fi
+
   GITHUB_REF_NAME="$tag" DOCS_SWITCHER_JSON_URL="$BASE/versions.json" \
     make -C "$wt/marvell-docs" html
 
