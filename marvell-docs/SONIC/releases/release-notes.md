@@ -4,7 +4,7 @@
 
 | BRANCH | Base Commit Hash |
 |---|---|
-| [202605](https://github.com/sonic-net/sonic-buildimage/tree/202605 | [08559af01eaca653c0345ba07785322d6f9bcfb6](https://github.com/sonic-net/sonic-buildimage/commit/08559af01eaca653c0345ba07785322d6f9bcfb6) |
+| [202605](https://github.com/sonic-net/sonic-buildimage/tree/202605) | [08559af01eaca653c0345ba07785322d6f9bcfb6](https://github.com/sonic-net/sonic-buildimage/commit/08559af01eaca653c0345ba07785322d6f9bcfb6) |
 
 ## SAI Version Compatibility
 
