@@ -48,20 +48,14 @@ def _current_version() -> str:
 def _notes_href(version: str, current_version: str) -> str:
     """Link target for a release's "Release Tag" cell.
 
-    The CURRENT build's own row can link straight to its release-notes page --
-    this build's own is_release check guarantees that page exists.
-
-    Other rows link to that release's own SONIC/releases/index.html instead of
-    guessing at its release-notes.html. Each version is built independently
-    (possibly from an old, already-tagged commit whose conf.py may not even
-    have generated a release-notes page -- e.g. a pre-refactor tag whose old
-    is_release regex didn't match a "_rcN" suffix), so we can't assume that
-    file exists there. index.html is always present, in every template era,
-    and itself links onward to release-notes when that build has one.
+    Same-version row: relative ``release-notes.html``. Other published versions:
+    that version's ``release-notes.html`` (multi-version deploy sets
+    ``GITHUB_REF_NAME`` per tag so release-notes is built for every published
+    entry in ``releases.yaml``).
     """
     if version == current_version:
         return "release-notes.html"
-    return f"../../../{version}/SONIC/releases/index.html"
+    return f"../../../{version}/SONIC/releases/release-notes.html"
 
 
 def _esc_attr(value: str) -> str:
