@@ -30,7 +30,6 @@
 <rect x="555" y="286" width="130" height="100" fill="#ffd9a8" stroke="#e08a00" stroke-width="3"/>
 <text x="620.0" y="316" fill="#7a4300" font-size="20" font-weight="bold" text-anchor="middle">VXLAN</text>
 <text x="620.0" y="344" fill="#7a4300" font-size="17" text-anchor="middle">VNI: 1000</text>
-<text x="620.0" y="368" fill="#7a4300" font-size="17" text-anchor="middle">(VLAN 100)</text>
 <rect x="685" y="286" width="170" height="100" fill="#e1d2f5" stroke="#7b4fc4" stroke-width="3"/>
 <text x="770.0" y="316" fill="#3b1f73" font-size="20" font-weight="bold" text-anchor="middle">Inner Ethernet</text>
 <text x="770.0" y="344" fill="#3b1f73" font-size="17" text-anchor="middle">SMAC: host1 MAC</text>
